@@ -60,13 +60,13 @@ POST /api/v1/auth/register
 ```
 
 **Acceptance Criteria:**
-- [ ] Registration form has fields for name, email, and password
-- [ ] Password must be at least 8 characters with uppercase, lowercase, and number
-- [ ] Form shows validation errors inline
-- [ ] API errors are displayed to the user (409 for duplicate email, 422 for validation)
-- [ ] After successful registration, user is automatically logged in
-- [ ] Store id, email, accessToken, refreshToken in Pinia store and localStorage
-- [ ] User is redirected to cards list after registration
+- [x] Registration form has fields for name, email, and password
+- [x] Password must be at least 8 characters with uppercase, lowercase, and number
+- [x] Form shows validation errors inline
+- [x] API errors are displayed to the user (409 for duplicate email, 422 for validation)
+- [x] After successful registration, user is automatically logged in
+- [x] Store id, email, accessToken, refreshToken in Pinia store and localStorage
+- [x] User is redirected to cards list after registration
 
 ---
 
