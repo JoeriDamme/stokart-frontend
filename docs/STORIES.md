@@ -103,12 +103,12 @@ POST /api/v1/auth/login
 ```
 
 **Acceptance Criteria:**
-- [ ] Login form has fields for email and password
-- [ ] Form validates input before submission
-- [ ] Store id, email, accessToken, refreshToken in Pinia store and localStorage
-- [ ] User is redirected to cards list on successful login
-- [ ] Error messages are displayed for invalid credentials (401)
-- [ ] Previous URL is restored after login (if user was redirected)
+- [x] Login form has fields for email and password
+- [x] Form validates input before submission
+- [x] Store id, email, accessToken, refreshToken in Pinia store and localStorage
+- [x] User is redirected to cards list on successful login
+- [x] Error messages are displayed for invalid credentials (401)
+- [x] Previous URL is restored after login (if user was redirected)
 
 ---
 
