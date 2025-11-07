@@ -1,0 +1,3892 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Stokart API",
+    "description": "Digital Loyalty Card Management API",
+    "contact": {
+      "name": "Stokart Support"
+    },
+    "license": {
+      "name": "MIT"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000/api/v1",
+      "description": "Development Server"
+    },
+    {
+      "url": "https://api.stokart.app/v1",
+      "description": "Production Server"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register a new user",
+        "description": "Create a new user account with email and password.\n\n**Password Requirements:**\n- Minimum 8 characters\n- At least 1 uppercase letter (A-Z)\n- At least 1 lowercase letter (a-z)\n- At least 1 number (0-9)\n\n**Returns:**\n- User ID\n- Email address\n- JWT access token (expires in 15 minutes)\n- JWT refresh token (expires in 7 days)\n\n**Note:** Password confirmation is handled client-side in the mobile app, not by the API.\n",
+        "operationId": "registerUser",
+        "requestBody": {
+          "description": "User registration data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "name",
+                  "email",
+                  "plainPassword"
+                ],
+                "properties": {
+                  "name": {
+                    "description": "User's full name (2-100 characters)",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2,
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "description": "Valid email address (must be unique, normalized to lowercase)",
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "plainPassword": {
+                    "description": "Password meeting complexity requirements",
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 8,
+                    "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
+                    "example": "SecurePass123"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "validRegistration": {
+                  "summary": "Valid registration",
+                  "value": {
+                    "name": "John Doe",
+                    "email": "user@example.com",
+                    "plainPassword": "SecurePass123"
+                  }
+                },
+                "invalidPassword": {
+                  "summary": "Invalid password (no uppercase/number)",
+                  "value": {
+                    "name": "John Doe",
+                    "email": "user@example.com",
+                    "plainPassword": "password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered and authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "id": {
+                          "description": "Unique user identifier",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "email": {
+                          "description": "Registered email address",
+                          "type": "string",
+                          "format": "email",
+                          "example": "user@example.com"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "User registered successfully"
+                        },
+                        "accessToken": {
+                          "description": "JWT access token (valid for 15 minutes)",
+                          "type": "string",
+                          "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJleHAiOjE3Mjk2MjQ4MDB9.signature"
+                        },
+                        "refreshToken": {
+                          "description": "JWT refresh token (valid for 7 days)",
+                          "type": "string",
+                          "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiZXhwIjoxNzMwMjI0ODAwfQ.signature"
+                        },
+                        "expiresIn": {
+                          "description": "Access token expiration time in seconds (15 minutes)",
+                          "type": "integer",
+                          "example": 900
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulRegistration": {
+                    "summary": "Successful user registration",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "email": "user@example.com",
+                        "message": "User registered successfully",
+                        "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "expiresIn": 900
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_JSON"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid JSON payload"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidJson": {
+                    "summary": "Invalid JSON in request body",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User with this email already exists",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "USER_ALREADY_EXISTS"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "User with email \"user@example.com\" already exists"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "duplicateEmail": {
+                    "summary": "Email address already registered",
+                    "value": {
+                      "error": {
+                        "code": "USER_ALREADY_EXISTS",
+                        "message": "User with email \"user@example.com\" already exists",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (invalid email or password)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_PASSWORD"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Password must contain at least one number"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidEmail": {
+                    "summary": "Invalid email format",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_EMAIL",
+                        "message": "Invalid email address",
+                        "details": [
+                          {
+                            "field": "email",
+                            "message": "Invalid email address"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "passwordTooShort": {
+                    "summary": "Password too short",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD",
+                        "message": "Password must be at least 8 characters long",
+                        "details": [
+                          {
+                            "field": "plainPassword",
+                            "message": "Password must be at least 8 characters long"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "passwordNoUppercase": {
+                    "summary": "Password missing uppercase letter",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD",
+                        "message": "Password must contain at least one uppercase letter",
+                        "details": [
+                          {
+                            "field": "plainPassword",
+                            "message": "Password must contain at least one uppercase letter"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "passwordNoLowercase": {
+                    "summary": "Password missing lowercase letter",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD",
+                        "message": "Password must contain at least one lowercase letter",
+                        "details": [
+                          {
+                            "field": "plainPassword",
+                            "message": "Password must contain at least one lowercase letter"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "passwordNoNumber": {
+                    "summary": "Password missing number",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD",
+                        "message": "Password must contain at least one number",
+                        "details": [
+                          {
+                            "field": "plainPassword",
+                            "message": "Password must contain at least one number"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login with email and password",
+        "description": "Authenticate a user with their email and password.\n\n**Returns:**\n- User ID\n- Email address\n- JWT access token (expires in 15 minutes)\n- JWT refresh token (expires in 7 days)\n\n**Security:**\n- Generic error message for invalid credentials (doesn't leak user existence)\n- Email is case-insensitive (normalized to lowercase)\n",
+        "operationId": "loginUser",
+        "requestBody": {
+          "description": "User login credentials",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "email",
+                  "plainPassword"
+                ],
+                "properties": {
+                  "email": {
+                    "description": "User's email address (case-insensitive)",
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  },
+                  "plainPassword": {
+                    "description": "User's password",
+                    "type": "string",
+                    "format": "password",
+                    "example": "SecurePass123"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "validLogin": {
+                  "summary": "Valid login credentials",
+                  "value": {
+                    "email": "user@example.com",
+                    "plainPassword": "SecurePass123"
+                  }
+                },
+                "uppercaseEmail": {
+                  "summary": "Email with uppercase (normalized automatically)",
+                  "value": {
+                    "email": "USER@EXAMPLE.COM",
+                    "plainPassword": "SecurePass123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "id": {
+                          "description": "Unique user identifier",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "email": {
+                          "description": "User's email address",
+                          "type": "string",
+                          "format": "email",
+                          "example": "user@example.com"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Login successful"
+                        },
+                        "accessToken": {
+                          "description": "JWT access token (valid for 15 minutes)",
+                          "type": "string",
+                          "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJleHAiOjE3Mjk2MjQ4MDB9.signature"
+                        },
+                        "refreshToken": {
+                          "description": "JWT refresh token (valid for 7 days)",
+                          "type": "string",
+                          "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiZXhwIjoxNzMwMjI0ODAwfQ.signature"
+                        },
+                        "expiresIn": {
+                          "description": "Access token expiration time in seconds (15 minutes)",
+                          "type": "integer",
+                          "example": 900
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulLogin": {
+                    "summary": "Successful authentication",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "email": "user@example.com",
+                        "message": "Login successful",
+                        "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "expiresIn": 900
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_JSON"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid JSON payload"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidJson": {
+                    "summary": "Invalid JSON in request body",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingEmail": {
+                    "summary": "Missing email field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingPassword": {
+                    "summary": "Missing password field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials (wrong email or password)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_CREDENTIALS"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid email or password"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidCredentials": {
+                    "summary": "Wrong email or password",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_CREDENTIALS",
+                        "message": "Invalid email or password",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Refresh access token using refresh token",
+        "description": "Exchange a valid refresh token for new access and refresh tokens.\n\n**Use Case:**\n- When the access token expires (after 15 minutes), use this endpoint to get new tokens\n- The client should store both access and refresh tokens securely\n- When API calls return 401 Unauthorized, attempt token refresh before re-prompting for login\n\n**Token Lifecycle:**\n- Access tokens expire after 15 minutes\n- Refresh tokens expire after 7 days\n- Both tokens are rotated (new tokens issued) on refresh\n- Store the new refresh token to replace the old one\n\n**Security:**\n- Only refresh tokens (type='refresh') are accepted\n- Access tokens (type='access') will be rejected\n- Expired refresh tokens cannot be used\n- Invalid or tampered tokens are rejected\n",
+        "operationId": "refreshToken",
+        "requestBody": {
+          "description": "Refresh token payload",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "refreshToken"
+                ],
+                "properties": {
+                  "refreshToken": {
+                    "description": "Valid JWT refresh token (type must be 'refresh', not 'access')",
+                    "type": "string",
+                    "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiZXhwIjoxNzMwMjI0ODAwfQ.signature"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "validRefresh": {
+                  "summary": "Valid refresh token",
+                  "value": {
+                    "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  }
+                },
+                "accessTokenInsteadOfRefresh": {
+                  "summary": "Invalid - using access token instead of refresh token",
+                  "value": {
+                    "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiYWNjZXNzIn0..."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tokens successfully refreshed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "accessToken": {
+                          "description": "New JWT access token (valid for 15 minutes)",
+                          "type": "string",
+                          "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJleHAiOjE3Mjk2MjQ4MDB9.signature"
+                        },
+                        "refreshToken": {
+                          "description": "New JWT refresh token (valid for 7 days) - IMPORTANT, replace the old one!",
+                          "type": "string",
+                          "example": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU1MGU4NDAwLWUyOWItNDFkNC1hNzE2LTQ0NjY1NTQ0MDAwMCIsImVtYWlsIjoidXNlckBleGFtcGxlLmNvbSIsInR5cGUiOiJyZWZyZXNoIiwiZXhwIjoxNzMwMjI0ODAwfQ.signature"
+                        },
+                        "expiresIn": {
+                          "description": "Access token expiration time in seconds (15 minutes)",
+                          "type": "integer",
+                          "example": 900
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulRefresh": {
+                    "summary": "Successful token refresh",
+                    "value": {
+                      "data": {
+                        "accessToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "refreshToken": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...",
+                        "expiresIn": 900
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid refresh token in request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "MISSING_REFRESH_TOKEN"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Refresh token is required"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingRefreshToken": {
+                    "summary": "Refresh token not provided in request body",
+                    "value": {
+                      "error": {
+                        "code": "MISSING_REFRESH_TOKEN",
+                        "message": "Refresh token is required",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidJson": {
+                    "summary": "Invalid JSON payload",
+                    "value": {
+                      "error": {
+                        "code": "MISSING_REFRESH_TOKEN",
+                        "message": "Refresh token is required",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid, expired, or wrong token type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_REFRESH_TOKEN"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid refresh token"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "expiredToken": {
+                    "summary": "Refresh token has expired (> 7 days old)",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_REFRESH_TOKEN",
+                        "message": "Refresh token has expired",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or tampered token",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_REFRESH_TOKEN",
+                        "message": "Invalid refresh token",
+                        "details": []
+                      }
+                    }
+                  },
+                  "wrongTokenType": {
+                    "summary": "Access token used instead of refresh token",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_REFRESH_TOKEN",
+                        "message": "Token is not a refresh token",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingUserId": {
+                    "summary": "Token missing required 'id' field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_REFRESH_TOKEN",
+                        "message": "Invalid refresh token",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingEmail": {
+                    "summary": "Token missing required 'email' field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_REFRESH_TOKEN",
+                        "message": "Invalid refresh token",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password-reset/request": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Request password reset email",
+        "description": "Request a password reset email to be sent to the user's email address.\n\n**Security Features:**\n- Always returns success (200 OK) even if email doesn't exist (prevents email enumeration attacks)\n- Generic success message doesn't reveal whether a user exists or not\n- Reset token is sent via email, not returned in API response\n\n**Process:**\n1. User submits their email address\n2. If email exists: Generate secure token, store in Redis with 1-hour expiration, send reset email\n3. If email doesn't exist: Return generic success message (for security)\n4. User receives email with reset link containing token\n5. User uses token in /auth/password-reset/confirm endpoint\n\n**Token Details:**\n- Format: UUID v4 (e.g., 550e8400-e29b-41d4-a716-446655440000)\n- Storage: Redis cache with 1-hour TTL\n- One-time use: Automatically deleted after successful password reset\n- Expires: After 1 hour or after use (whichever comes first)\n",
+        "operationId": "requestPasswordReset",
+        "requestBody": {
+          "description": "Email address for password reset",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "description": "Email address associated with the account (case-insensitive)",
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "existingUser": {
+                  "summary": "Email exists in system",
+                  "value": {
+                    "email": "user@example.com"
+                  }
+                },
+                "nonExistentUser": {
+                  "summary": "Email doesn't exist (still returns success for security)",
+                  "value": {
+                    "email": "nonexistent@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request processed successfully (always returns success for security)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "message": {
+                          "description": "Generic message that doesn't reveal user existence",
+                          "type": "string",
+                          "example": "If the email exists, a password reset link has been sent"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successResponse": {
+                    "summary": "Generic success response",
+                    "value": {
+                      "data": {
+                        "message": "If the email exists, a password reset link has been sent"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_JSON"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid JSON payload"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidJson": {
+                    "summary": "Invalid JSON in request body",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid email format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_EMAIL"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid email address"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidEmailFormat": {
+                    "summary": "Email format validation failed",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_EMAIL",
+                        "message": "Invalid email address",
+                        "details": [
+                          {
+                            "field": "email",
+                            "message": "Invalid email address"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password-reset/confirm": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Confirm password reset with token",
+        "description": "Reset user's password using the token received via email.\n\n**Password Requirements:**\n- Minimum 8 characters\n- At least 1 uppercase letter (A-Z)\n- At least 1 lowercase letter (a-z)\n- At least 1 number (0-9)\n\n**Token Validation:**\n- Must be valid UUID v4 format\n- Must exist in Redis (not expired)\n- Must not have been used already (one-time use)\n- Automatically deleted after successful reset\n\n**Process:**\n1. User submits token (from email) and new password\n2. System validates token format and existence\n3. System validates new password requirements\n4. System updates user's password\n5. System deletes token (one-time use)\n6. User can now login with new password\n",
+        "operationId": "confirmPasswordReset",
+        "requestBody": {
+          "description": "Reset token and new password",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "token",
+                  "newPassword"
+                ],
+                "properties": {
+                  "token": {
+                    "description": "Password reset token received via email (UUID v4 format)",
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                  },
+                  "newPassword": {
+                    "description": "New password meeting complexity requirements",
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 8,
+                    "pattern": "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$",
+                    "example": "NewSecurePass123"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "validReset": {
+                  "summary": "Valid token and password",
+                  "value": {
+                    "token": "550e8400-e29b-41d4-a716-446655440000",
+                    "newPassword": "NewSecurePass123"
+                  }
+                },
+                "invalidTokenFormat": {
+                  "summary": "Invalid token format (not UUID)",
+                  "value": {
+                    "token": "invalid-token-format",
+                    "newPassword": "NewSecurePass123"
+                  }
+                },
+                "weakPassword": {
+                  "summary": "Password doesn't meet requirements",
+                  "value": {
+                    "token": "550e8400-e29b-41d4-a716-446655440000",
+                    "newPassword": "weak"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password successfully reset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "message": {
+                          "description": "Success confirmation message",
+                          "type": "string",
+                          "example": "Password reset successfully"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulReset": {
+                    "summary": "Password successfully changed",
+                    "value": {
+                      "data": {
+                        "message": "Password reset successfully"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_JSON"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid JSON payload"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidJson": {
+                    "summary": "Invalid JSON in request body",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingToken": {
+                    "summary": "Missing token field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingPassword": {
+                    "summary": "Missing newPassword field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (invalid token or password)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_PASSWORD_RESET_TOKEN"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid password reset token"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidTokenFormat": {
+                    "summary": "Token format is invalid (not UUID)",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD_RESET_TOKEN",
+                        "message": "Invalid password reset token: invalid-token-format",
+                        "details": []
+                      }
+                    }
+                  },
+                  "expiredToken": {
+                    "summary": "Token expired or doesn't exist",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD_RESET_TOKEN",
+                        "message": "Password reset token has expired or does not exist",
+                        "details": []
+                      }
+                    }
+                  },
+                  "alreadyUsedToken": {
+                    "summary": "Token was already used (one-time use only)",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD_RESET_TOKEN",
+                        "message": "Password reset token has expired or does not exist",
+                        "details": []
+                      }
+                    }
+                  },
+                  "passwordTooShort": {
+                    "summary": "Password doesn't meet minimum length",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD",
+                        "message": "Password must be at least 8 characters long",
+                        "details": [
+                          {
+                            "field": "newPassword",
+                            "message": "Password must be at least 8 characters long"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "passwordNoUppercase": {
+                    "summary": "Password missing uppercase letter",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD",
+                        "message": "Password must contain at least one uppercase letter",
+                        "details": [
+                          {
+                            "field": "newPassword",
+                            "message": "Password must contain at least one uppercase letter"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "passwordNoLowercase": {
+                    "summary": "Password missing lowercase letter",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD",
+                        "message": "Password must contain at least one lowercase letter",
+                        "details": [
+                          {
+                            "field": "newPassword",
+                            "message": "Password must contain at least one lowercase letter"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "passwordNoNumber": {
+                    "summary": "Password missing number",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_PASSWORD",
+                        "message": "Password must contain at least one number",
+                        "details": [
+                          {
+                            "field": "newPassword",
+                            "message": "Password must contain at least one number"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": [
+          "User Profile"
+        ],
+        "summary": "Get user profile",
+        "description": "Retrieve the authenticated user's profile information.\n\n**Authentication Required:**\n- Requires valid JWT access token in Authorization header\n- Returns profile of the currently authenticated user\n\n**Returns:**\n- User ID (UUID)\n- Name\n- Email (lowercase)\n- Account creation date (ISO 8601 format)\n",
+        "operationId": "getUserProfile",
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "id": {
+                          "description": "Unique user identifier",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "name": {
+                          "description": "User's full name",
+                          "type": "string",
+                          "example": "John Doe"
+                        },
+                        "email": {
+                          "description": "User's email address (lowercase)",
+                          "type": "string",
+                          "format": "email",
+                          "example": "user@example.com"
+                        },
+                        "createdAt": {
+                          "description": "Account creation timestamp (ISO 8601 format)",
+                          "type": "string",
+                          "format": "date-time",
+                          "example": 1735732800
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulRetrieval": {
+                    "summary": "Profile retrieved successfully",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "name": "John Doe",
+                        "email": "user@example.com",
+                        "createdAt": 1735732800
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (missing or invalid JWT token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "UNAUTHORIZED"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Full authentication is required to access this resource"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Full authentication is required to access this resource",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or expired JWT token",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid JWT token",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "User Profile"
+        ],
+        "summary": "Update user profile",
+        "description": "Update the authenticated user's profile information (name and email).\n\n**Authentication Required:**\n- Requires valid JWT access token in Authorization header\n- Updates the currently authenticated user's profile\n\n**Validation:**\n- Name: 2-100 characters\n- Email: Valid format, must be unique (case-insensitive)\n\n**Email Uniqueness:**\n- Email must not be taken by another user\n- User can keep their current email (no conflict)\n- Email is normalized to lowercase\n\n**Returns:**\n- Success message\n- Updated name\n- Updated email (normalized to lowercase)\n",
+        "operationId": "updateUserProfile",
+        "requestBody": {
+          "description": "Profile update data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "name",
+                  "email"
+                ],
+                "properties": {
+                  "name": {
+                    "description": "User's full name (2-100 characters)",
+                    "type": "string",
+                    "maxLength": 100,
+                    "minLength": 2,
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "description": "Valid email address (must be unique, normalized to lowercase)",
+                    "type": "string",
+                    "format": "email",
+                    "example": "user@example.com"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "updateBoth": {
+                  "summary": "Update both name and email",
+                  "value": {
+                    "name": "Jane Smith",
+                    "email": "jane.smith@example.com"
+                  }
+                },
+                "updateOnlyName": {
+                  "summary": "Update only name (keep current email)",
+                  "value": {
+                    "name": "John Updated",
+                    "email": "user@example.com"
+                  }
+                },
+                "updateOnlyEmail": {
+                  "summary": "Update only email (keep current name)",
+                  "value": {
+                    "name": "John Doe",
+                    "email": "newemail@example.com"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "message": {
+                          "description": "Success confirmation message",
+                          "type": "string",
+                          "example": "Profile updated successfully"
+                        },
+                        "name": {
+                          "description": "Updated name",
+                          "type": "string",
+                          "example": "John Doe"
+                        },
+                        "email": {
+                          "description": "Updated email (normalized to lowercase)",
+                          "type": "string",
+                          "format": "email",
+                          "example": "user@example.com"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulUpdate": {
+                    "summary": "Profile successfully updated",
+                    "value": {
+                      "data": {
+                        "message": "Profile updated successfully",
+                        "name": "Jane Smith",
+                        "email": "jane.smith@example.com"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload or missing fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_JSON"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid JSON payload"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidJson": {
+                    "summary": "Invalid JSON in request body",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingName": {
+                    "summary": "Missing name field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingEmail": {
+                    "summary": "Missing email field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (missing or invalid JWT token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "UNAUTHORIZED"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Full authentication is required to access this resource"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Full authentication is required to access this resource",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or expired JWT token",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid JWT token",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already taken by another user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "USER_ALREADY_EXISTS"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "User with email \"other@example.com\" already exists"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "emailTaken": {
+                    "summary": "Email already registered to another user",
+                    "value": {
+                      "error": {
+                        "code": "USER_ALREADY_EXISTS",
+                        "message": "User with email \"other@example.com\" already exists",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (invalid name or email format)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_EMAIL"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid email address"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidEmailFormat": {
+                    "summary": "Invalid email format",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_EMAIL",
+                        "message": "Invalid email address",
+                        "details": [
+                          {
+                            "field": "email",
+                            "message": "Invalid email address"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "nameTooShort": {
+                    "summary": "Name too short (< 2 characters)",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_NAME",
+                        "message": "Name must be at least 2 characters long",
+                        "details": [
+                          {
+                            "field": "name",
+                            "message": "Name must be at least 2 characters long"
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "nameTooLong": {
+                    "summary": "Name too long (> 100 characters)",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_NAME",
+                        "message": "Name must not exceed 100 characters",
+                        "details": [
+                          {
+                            "field": "name",
+                            "message": "Name must not exceed 100 characters"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "User Profile"
+        ],
+        "summary": "Delete user account",
+        "description": "Permanently delete the authenticated user's account (soft delete).\n\n**Authentication Required:**\n- Requires valid JWT access token in Authorization header\n- Deletes the currently authenticated user's account\n\n**Password Verification:**\n- User must provide their current password to confirm deletion\n- Password is verified before deletion\n- Wrong password prevents deletion\n\n**What Happens:**\n- Account is soft deleted (marked as deleted in database)\n- User cannot login after deletion\n- Account data is preserved but inaccessible\n- Deleted users are filtered from all queries\n\n**Security:**\n- Requires password confirmation to prevent unauthorized deletion\n- Generic error message for wrong password (doesn't leak information)\n- JWT token becomes invalid after deletion (user is considered non-existent)\n\n**Note:** This is a soft delete. The account is marked as deleted but data is retained in the database.\n",
+        "operationId": "deleteUserAccount",
+        "requestBody": {
+          "description": "Password confirmation for account deletion",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "password"
+                ],
+                "properties": {
+                  "password": {
+                    "description": "User's current password (required for confirmation)",
+                    "type": "string",
+                    "format": "password",
+                    "example": "SecurePass123"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "validDeletion": {
+                  "summary": "Valid password confirmation",
+                  "value": {
+                    "password": "SecurePass123"
+                  }
+                },
+                "wrongPassword": {
+                  "summary": "Wrong password (deletion prevented)",
+                  "value": {
+                    "password": "WrongPassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Account successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "message": {
+                          "description": "Success confirmation message",
+                          "type": "string",
+                          "example": "Account deleted successfully"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulDeletion": {
+                    "summary": "Account deleted successfully",
+                    "value": {
+                      "data": {
+                        "message": "Account deleted successfully"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload or missing password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_JSON"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid JSON payload"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidJson": {
+                    "summary": "Invalid JSON in request body",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingPassword": {
+                    "summary": "Missing password field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated or wrong password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "UNAUTHORIZED"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid email or password"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Full authentication is required to access this resource",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or expired JWT token",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid JWT token",
+                        "details": []
+                      }
+                    }
+                  },
+                  "wrongPassword": {
+                    "summary": "Wrong password provided",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_CREDENTIALS",
+                        "message": "Invalid email or password",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/cards": {
+      "get": {
+        "tags": [
+          "Cards"
+        ],
+        "summary": "List all cards for authenticated user",
+        "description": "Retrieve a paginated list of all loyalty cards for the currently authenticated user.\n\n**Authentication Required:**\n- Requires valid JWT access token in Authorization header\n- Only returns cards owned by the authenticated user\n\n**Sorting:**\n- Cards are sorted by creation date (newest first)\n- Most recently added cards appear at the top of the list\n\n**Pagination:**\n- Default page size: 20 cards per page\n- Maximum page size: 100 cards per page\n- Minimum page size: 1 card per page\n- Page numbers start at 1\n\n**Filtering:**\n- Automatically filters out soft-deleted cards\n- Only returns active cards\n\n**Returns:**\n- Array of cards with full details\n- Pagination metadata (current page, total items, last page)\n\n**Empty State:**\n- Returns empty array when user has no cards\n- Pagination shows: total=0, lastPage=1\n",
+        "operationId": "listCards",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (minimum 1, default 1)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1,
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (1-100, default 20)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "example": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of cards retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "id": {
+                                "description": "Unique card identifier",
+                                "type": "string",
+                                "format": "uuid",
+                                "example": "550e8400-e29b-41d4-a716-446655440000"
+                              },
+                              "cardNumber": {
+                                "description": "Card number",
+                                "type": "string",
+                                "example": "1234567890123"
+                              },
+                              "cardName": {
+                                "description": "Card nickname (null if not set)",
+                                "type": "string",
+                                "example": "My Loyalty Card",
+                                "nullable": true
+                              },
+                              "barcodeType": {
+                                "description": "Barcode format type",
+                                "type": "string",
+                                "example": "EAN13"
+                              },
+                              "barcodeData": {
+                                "description": "Barcode data",
+                                "type": "string",
+                                "example": "1234567890123"
+                              },
+                              "storeId": {
+                                "description": "Store UUID (null if not set)",
+                                "type": "string",
+                                "format": "uuid",
+                                "example": "550e8400-e29b-41d4-a716-446655440000",
+                                "nullable": true
+                              },
+                              "createdAt": {
+                                "description": "Card creation timestamp (ISO 8601)",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": 1735732800
+                              },
+                              "updatedAt": {
+                                "description": "Card last update timestamp (ISO 8601)",
+                                "type": "string",
+                                "format": "date-time",
+                                "example": 1735732800
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "pagination": {
+                          "properties": {
+                            "currentPage": {
+                              "description": "Current page number",
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "perPage": {
+                              "description": "Items per page",
+                              "type": "integer",
+                              "example": 20
+                            },
+                            "total": {
+                              "description": "Total number of cards",
+                              "type": "integer",
+                              "example": 45
+                            },
+                            "lastPage": {
+                              "description": "Last page number",
+                              "type": "integer",
+                              "example": 3
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "cardsList": {
+                    "summary": "List of cards with pagination",
+                    "value": {
+                      "data": {
+                        "data": [
+                          {
+                            "id": "550e8400-e29b-41d4-a716-446655440000",
+                            "cardNumber": "1234567890123",
+                            "cardName": "Loyalty Card",
+                            "barcodeType": "EAN13",
+                            "barcodeData": "1234567890123",
+                            "storeId": "660e8400-e29b-41d4-a716-446655440000",
+                            "createdAt": 1735732800,
+                            "updatedAt": 1735732800
+                          },
+                          {
+                            "id": "770e8400-e29b-41d4-a716-446655440000",
+                            "cardNumber": "ABCD1234",
+                            "cardName": null,
+                            "barcodeType": "CODE128",
+                            "barcodeData": "ABCD1234",
+                            "storeId": null,
+                            "createdAt": 1735828200,
+                            "updatedAt": 1735828200
+                          }
+                        ],
+                        "pagination": {
+                          "currentPage": 1,
+                          "perPage": 20,
+                          "total": 2,
+                          "lastPage": 1
+                        }
+                      }
+                    }
+                  },
+                  "emptyList": {
+                    "summary": "Empty list (no cards)",
+                    "value": {
+                      "data": {
+                        "data": [],
+                        "pagination": {
+                          "currentPage": 1,
+                          "perPage": 20,
+                          "total": 0,
+                          "lastPage": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (missing or invalid JWT token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "UNAUTHORIZED"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Full authentication is required to access this resource"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Full authentication is required to access this resource",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or expired JWT token",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid JWT token",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Cards"
+        ],
+        "summary": "Create a new card",
+        "description": "Create a new loyalty card for the authenticated user.\n\n**Authentication Required:**\n- Requires valid JWT access token in Authorization header\n- Card is created for the currently authenticated user\n\n**Validation:**\n- Card number: Required, alphanumeric with spaces/hyphens/underscores allowed (max 255 chars)\n- Card name: Optional (max 255 chars)\n- Barcode type: Required, must be one of: EAN8, EAN13, CODE128, QR, AZTEC, PDF417\n- Store ID: Optional UUID v4\n\n**Barcode Validation:**\n- EAN8: Must be 7-8 digits\n- EAN13: Must be 12-13 digits\n- CODE128: Must contain only ASCII characters\n- QR, AZTEC, PDF417: No specific validation\n\n**Duplicate Detection:**\n- Cannot create two cards with same card number and store ID for the same user\n- Different store IDs or different users allow duplicate card numbers\n\n**Returns:**\n- Card ID (UUID)\n- Card number\n- Card name (null if not provided)\n- Barcode type and data\n- Store ID (null if not provided)\n- Creation timestamp\n",
+        "operationId": "createCard",
+        "requestBody": {
+          "description": "Card creation data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "cardNumber",
+                  "barcodeType"
+                ],
+                "properties": {
+                  "storeId": {
+                    "description": "Store UUID (optional)",
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "550e8400-e29b-41d4-a716-446655440000",
+                    "nullable": true
+                  },
+                  "cardNumber": {
+                    "description": "Card number (alphanumeric, spaces, hyphens, underscores allowed)",
+                    "type": "string",
+                    "example": "1234567890123"
+                  },
+                  "cardName": {
+                    "description": "Optional card nickname (max 255 chars)",
+                    "type": "string",
+                    "example": "My Loyalty Card",
+                    "nullable": true
+                  },
+                  "barcodeType": {
+                    "description": "Barcode format type",
+                    "type": "string",
+                    "enum": [
+                      "EAN8",
+                      "EAN13",
+                      "CODE128",
+                      "QR",
+                      "AZTEC",
+                      "PDF417"
+                    ],
+                    "example": "EAN13"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "validCard": {
+                  "summary": "Create card with all fields",
+                  "value": {
+                    "storeId": "550e8400-e29b-41d4-a716-446655440000",
+                    "cardNumber": "1234567890123",
+                    "cardName": "My Loyalty Card",
+                    "barcodeType": "EAN13"
+                  }
+                },
+                "minimalCard": {
+                  "summary": "Create card with required fields only",
+                  "value": {
+                    "storeId": null,
+                    "cardNumber": "1234567890123",
+                    "cardName": null,
+                    "barcodeType": "EAN13"
+                  }
+                },
+                "qrCodeCard": {
+                  "summary": "Create QR code card",
+                  "value": {
+                    "storeId": null,
+                    "cardNumber": "https://example.com/card/12345",
+                    "cardName": "Website Card",
+                    "barcodeType": "QR"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Card successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "id": {
+                          "description": "Unique card identifier",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "cardNumber": {
+                          "description": "Card number as stored",
+                          "type": "string",
+                          "example": "1234567890123"
+                        },
+                        "cardName": {
+                          "description": "Card nickname (null if not provided)",
+                          "type": "string",
+                          "example": "My Loyalty Card",
+                          "nullable": true
+                        },
+                        "barcodeType": {
+                          "description": "Barcode format type",
+                          "type": "string",
+                          "example": "EAN13"
+                        },
+                        "barcodeData": {
+                          "description": "Barcode data (same as card number)",
+                          "type": "string",
+                          "example": "1234567890123"
+                        },
+                        "storeId": {
+                          "description": "Store UUID (null if not provided)",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "description": "Card creation timestamp (ISO 8601)",
+                          "type": "string",
+                          "format": "date-time",
+                          "example": 1735732800
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulCreation": {
+                    "summary": "Card created successfully",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "cardNumber": "1234567890123",
+                        "cardName": "My Loyalty Card",
+                        "barcodeType": "EAN13",
+                        "barcodeData": "1234567890123",
+                        "storeId": "550e8400-e29b-41d4-a716-446655440000",
+                        "createdAt": 1735732800
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload or missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_JSON"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid JSON payload"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidJson": {
+                    "summary": "Invalid JSON in request body",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingCardNumber": {
+                    "summary": "Missing cardNumber field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingBarcodeType": {
+                    "summary": "Missing barcodeType field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (missing or invalid JWT token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "UNAUTHORIZED"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Full authentication is required to access this resource"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Full authentication is required to access this resource",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or expired JWT token",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid JWT token",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (invalid card data or barcode format)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_CARD_NUMBER"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Card number cannot be empty"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "emptyCardNumber": {
+                    "summary": "Empty card number",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_CARD_NUMBER",
+                        "message": "Card number cannot be empty",
+                        "details": []
+                      }
+                    }
+                  },
+                  "cardNumberTooLong": {
+                    "summary": "Card number too long (> 255 chars)",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_CARD_NUMBER",
+                        "message": "Card number cannot exceed 255 characters",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidBarcodeType": {
+                    "summary": "Invalid barcode type",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_BARCODE_TYPE",
+                        "message": "Invalid barcode type: INVALID. Valid types are: EAN8, EAN13, CODE128, QR, AZTEC, PDF417",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidEAN13": {
+                    "summary": "Invalid EAN13 format",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_BARCODE",
+                        "message": "Invalid EAN13 barcode: 123. Must be 12-13 digits",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidEAN8": {
+                    "summary": "Invalid EAN8 format",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_BARCODE",
+                        "message": "Invalid EAN8 barcode: 12. Must be 7-8 digits",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/cards/{id}": {
+      "get": {
+        "tags": [
+          "Cards"
+        ],
+        "summary": "Get a specific card by ID",
+        "description": "Retrieve details of a specific loyalty card by its ID.\n\n**Authentication Required:**\n- Requires valid JWT access token in Authorization header\n- User can only view their own cards\n\n**Security:**\n- Returns 404 if card doesn't exist\n- Returns 404 if card belongs to another user (prevents information disclosure)\n\n**Returns:**\n- Card ID (UUID)\n- Card number\n- Card name (null if not provided)\n- Barcode type and data\n- Store ID (null if not provided)\n- Creation and update timestamps (ISO 8601 format)\n",
+        "operationId": "getCard",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Card UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Card retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "id": {
+                          "description": "Unique card identifier",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "cardNumber": {
+                          "description": "Card number",
+                          "type": "string",
+                          "example": "1234567890123"
+                        },
+                        "cardName": {
+                          "description": "Card nickname (null if not provided)",
+                          "type": "string",
+                          "example": "My Loyalty Card",
+                          "nullable": true
+                        },
+                        "barcodeType": {
+                          "description": "Barcode format type",
+                          "type": "string",
+                          "example": "EAN13"
+                        },
+                        "barcodeData": {
+                          "description": "Barcode data",
+                          "type": "string",
+                          "example": "1234567890123"
+                        },
+                        "storeId": {
+                          "description": "Store UUID (null if not provided)",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "description": "Card creation timestamp (ISO 8601)",
+                          "type": "string",
+                          "format": "date-time",
+                          "example": 1735732800
+                        },
+                        "updatedAt": {
+                          "description": "Card last update timestamp (ISO 8601)",
+                          "type": "string",
+                          "format": "date-time",
+                          "example": 1735732800
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulRetrieval": {
+                    "summary": "Card retrieved successfully",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "cardNumber": "1234567890123",
+                        "cardName": "My Loyalty Card",
+                        "barcodeType": "EAN13",
+                        "barcodeData": "1234567890123",
+                        "storeId": "550e8400-e29b-41d4-a716-446655440000",
+                        "createdAt": 1735732800,
+                        "updatedAt": 1735732800
+                      }
+                    }
+                  },
+                  "cardWithoutOptionalFields": {
+                    "summary": "Card without optional fields",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "cardNumber": "9876543210",
+                        "cardName": null,
+                        "barcodeType": "CODE128",
+                        "barcodeData": "9876543210",
+                        "storeId": null,
+                        "createdAt": 1735732800,
+                        "updatedAt": 1735732800
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (missing or invalid JWT token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "UNAUTHORIZED"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Full authentication is required to access this resource"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Full authentication is required to access this resource",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or expired JWT token",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid JWT token",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card not found or doesn't belong to the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "CARD_NOT_FOUND"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "cardNotFound": {
+                    "summary": "Card doesn't exist",
+                    "value": {
+                      "error": {
+                        "code": "CARD_NOT_FOUND",
+                        "message": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found",
+                        "details": []
+                      }
+                    }
+                  },
+                  "cardBelongsToDifferentUser": {
+                    "summary": "Card belongs to another user (security)",
+                    "value": {
+                      "error": {
+                        "code": "CARD_NOT_FOUND",
+                        "message": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid card ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_CARD_ID"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid card ID format"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidUuidFormat": {
+                    "summary": "Invalid UUID format",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_CARD_ID",
+                        "message": "Invalid card ID format",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Cards"
+        ],
+        "summary": "Update an existing card",
+        "description": "Update an existing loyalty card's information.\n\n**Authentication Required:**\n- Requires valid JWT access token in Authorization header\n- User can only update their own cards\n\n**Security:**\n- Returns 404 if card doesn't exist\n- Returns 404 if card belongs to another user (prevents unauthorized modification)\n\n**Validation:**\n- Card number: Required, alphanumeric with spaces/hyphens/underscores allowed (max 255 chars)\n- Card name: Optional (max 255 chars)\n- Barcode type: Required, must be one of: EAN8, EAN13, CODE128, QR, AZTEC, PDF417\n- Store ID: Optional UUID v4\n\n**Barcode Validation:**\n- EAN8: Must be 7-8 digits\n- EAN13: Must be 12-13 digits\n- CODE128: Must contain only ASCII characters\n- QR, AZTEC, PDF417: No specific validation\n\n**Update Behavior:**\n- All fields are required in the request (full update, not partial)\n- Barcode is regenerated if card number or barcode type changes\n- updatedAt timestamp is automatically updated\n- createdAt timestamp remains unchanged\n\n**Returns:**\n- Card ID (UUID)\n- Updated card number\n- Updated card name (null if not provided)\n- Updated barcode type and data\n- Updated store ID (null if not provided)\n- Creation and update timestamps (ISO 8601 format)\n",
+        "operationId": "updateCard",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Card UUID to update",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Updated card data",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "cardNumber",
+                  "barcodeType"
+                ],
+                "properties": {
+                  "storeId": {
+                    "description": "Store UUID (optional)",
+                    "type": "string",
+                    "format": "uuid",
+                    "example": "550e8400-e29b-41d4-a716-446655440000",
+                    "nullable": true
+                  },
+                  "cardNumber": {
+                    "description": "Updated card number (alphanumeric, spaces, hyphens, underscores allowed)",
+                    "type": "string",
+                    "example": "9876543210"
+                  },
+                  "cardName": {
+                    "description": "Updated card nickname (max 255 chars, null to remove)",
+                    "type": "string",
+                    "example": "Updated Card Name",
+                    "nullable": true
+                  },
+                  "barcodeType": {
+                    "description": "Updated barcode format type",
+                    "type": "string",
+                    "enum": [
+                      "EAN8",
+                      "EAN13",
+                      "CODE128",
+                      "QR",
+                      "AZTEC",
+                      "PDF417"
+                    ],
+                    "example": "CODE128"
+                  }
+                },
+                "type": "object"
+              },
+              "examples": {
+                "updateAllFields": {
+                  "summary": "Update all card fields",
+                  "value": {
+                    "storeId": "550e8400-e29b-41d4-a716-446655440000",
+                    "cardNumber": "9876543210",
+                    "cardName": "Updated Card Name",
+                    "barcodeType": "CODE128"
+                  }
+                },
+                "changeBarcodeType": {
+                  "summary": "Change barcode type from EAN13 to QR",
+                  "value": {
+                    "storeId": null,
+                    "cardNumber": "https://example.com/card/12345",
+                    "cardName": "Website Card",
+                    "barcodeType": "QR"
+                  }
+                },
+                "removeOptionalFields": {
+                  "summary": "Remove optional fields (name and store)",
+                  "value": {
+                    "storeId": null,
+                    "cardNumber": "9876543210",
+                    "cardName": null,
+                    "barcodeType": "CODE128"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Card successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "id": {
+                          "description": "Unique card identifier (unchanged)",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000"
+                        },
+                        "cardNumber": {
+                          "description": "Updated card number",
+                          "type": "string",
+                          "example": "9876543210"
+                        },
+                        "cardName": {
+                          "description": "Updated card nickname (null if removed)",
+                          "type": "string",
+                          "example": "Updated Card Name",
+                          "nullable": true
+                        },
+                        "barcodeType": {
+                          "description": "Updated barcode format type",
+                          "type": "string",
+                          "example": "CODE128"
+                        },
+                        "barcodeData": {
+                          "description": "Updated barcode data (same as card number)",
+                          "type": "string",
+                          "example": "9876543210"
+                        },
+                        "storeId": {
+                          "description": "Updated store UUID (null if removed)",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440000",
+                          "nullable": true
+                        },
+                        "createdAt": {
+                          "description": "Card creation timestamp (unchanged)",
+                          "type": "string",
+                          "format": "date-time",
+                          "example": 1735732800
+                        },
+                        "updatedAt": {
+                          "description": "Card last update timestamp (updated to current time)",
+                          "type": "string",
+                          "format": "date-time",
+                          "example": 1735828200
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulUpdate": {
+                    "summary": "Card updated successfully",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "cardNumber": "9876543210",
+                        "cardName": "Updated Card Name",
+                        "barcodeType": "CODE128",
+                        "barcodeData": "9876543210",
+                        "storeId": "550e8400-e29b-41d4-a716-446655440000",
+                        "createdAt": 1735732800,
+                        "updatedAt": 1735828200
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid JSON payload or missing required fields",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_JSON"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid JSON payload"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidJson": {
+                    "summary": "Invalid JSON in request body",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingCardNumber": {
+                    "summary": "Missing cardNumber field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  },
+                  "missingBarcodeType": {
+                    "summary": "Missing barcodeType field",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_JSON",
+                        "message": "Invalid JSON payload",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (missing or invalid JWT token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "UNAUTHORIZED"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Full authentication is required to access this resource"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Full authentication is required to access this resource",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or expired JWT token",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid JWT token",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card not found or doesn't belong to the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "CARD_NOT_FOUND"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "cardNotFound": {
+                    "summary": "Card doesn't exist",
+                    "value": {
+                      "error": {
+                        "code": "CARD_NOT_FOUND",
+                        "message": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found",
+                        "details": []
+                      }
+                    }
+                  },
+                  "cardBelongsToDifferentUser": {
+                    "summary": "Card belongs to another user (security)",
+                    "value": {
+                      "error": {
+                        "code": "CARD_NOT_FOUND",
+                        "message": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation failed (invalid card data or barcode format)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_CARD_NUMBER"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Card number cannot be empty"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "emptyCardNumber": {
+                    "summary": "Empty card number",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_CARD_NUMBER",
+                        "message": "Card number cannot be empty",
+                        "details": []
+                      }
+                    }
+                  },
+                  "cardNumberTooLong": {
+                    "summary": "Card number too long (> 255 chars)",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_CARD_NUMBER",
+                        "message": "Card number cannot exceed 255 characters",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidBarcodeType": {
+                    "summary": "Invalid barcode type",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_BARCODE_TYPE",
+                        "message": "Invalid barcode type: INVALID. Valid types are: EAN8, EAN13, CODE128, QR, AZTEC, PDF417",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidEAN13": {
+                    "summary": "Invalid EAN13 format",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_BARCODE",
+                        "message": "Invalid EAN13 barcode: 123. Must be 12-13 digits",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidEAN8": {
+                    "summary": "Invalid EAN8 format",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_BARCODE",
+                        "message": "Invalid EAN8 barcode: 12. Must be 7-8 digits",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "Cards"
+        ],
+        "summary": "Delete a card (soft delete)",
+        "description": "Delete a loyalty card (soft delete - card is marked as deleted but preserved in database).\n\n**Authentication Required:**\n- Requires valid JWT access token in Authorization header\n- User can only delete their own cards\n\n**Security:**\n- Returns 404 if card doesn't exist\n- Returns 404 if card belongs to another user (prevents unauthorized deletion)\n- Card is soft deleted (marked with deleted_at timestamp)\n\n**Soft Delete Behavior:**\n- Card is not permanently removed from database\n- Card becomes inaccessible via API (filtered from all queries)\n- Card data is preserved for potential recovery\n- Deleted cards are excluded from all find/list operations\n\n**Returns:**\n- Success message confirming deletion\n\n**Note:** After deletion, attempting to retrieve this card will return 404.\n",
+        "operationId": "deleteCard",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Card UUID to delete",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440000"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Card successfully deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "message": {
+                          "description": "Success confirmation message",
+                          "type": "string",
+                          "example": "Card deleted successfully"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulDeletion": {
+                    "summary": "Card deleted successfully",
+                    "value": {
+                      "data": {
+                        "message": "Card deleted successfully"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated (missing or invalid JWT token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "UNAUTHORIZED"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Full authentication is required to access this resource"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "missingToken": {
+                    "summary": "Missing Authorization header",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Full authentication is required to access this resource",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidToken": {
+                    "summary": "Invalid or expired JWT token",
+                    "value": {
+                      "error": {
+                        "code": "UNAUTHORIZED",
+                        "message": "Invalid JWT token",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Card not found or doesn't belong to the user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "CARD_NOT_FOUND"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "cardNotFound": {
+                    "summary": "Card doesn't exist",
+                    "value": {
+                      "error": {
+                        "code": "CARD_NOT_FOUND",
+                        "message": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found",
+                        "details": []
+                      }
+                    }
+                  },
+                  "cardBelongsToDifferentUser": {
+                    "summary": "Card belongs to another user (security)",
+                    "value": {
+                      "error": {
+                        "code": "CARD_NOT_FOUND",
+                        "message": "Card with ID \"550e8400-e29b-41d4-a716-446655440000\" not found",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "description": "JWT access token obtained from /auth/register or /auth/login.\n\n**Format:** Bearer {token}\n\n**Example:** Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...\n\n**Token Expiration:** 15 minutes\n\n**Note:** Use /auth/refresh to get a new token when expired.\n",
+        "bearerFormat": "JWT",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Authentication"
+    },
+    {
+      "name": "User Profile",
+      "description": "User Profile"
+    },
+    {
+      "name": "Cards",
+      "description": "Cards"
+    }
+  ]
+}
