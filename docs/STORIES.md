@@ -230,11 +230,11 @@ GET /api/v1/cards?page={page}&limit={limit}
 - Returns empty array when user has no cards
 
 **Acceptance Criteria:**
-- [ ] Cards are displayed in a responsive grid/list layout
-- [ ] Each card shows cardName (or "Unnamed Card" if null), cardNumber, and barcodeType
-- [ ] Empty state is shown when user has no cards (total = 0)
-- [ ] Loading spinner is displayed while fetching cards
-- [ ] Quick action buttons are available on each card (view, edit, delete)
+- [x] Cards are displayed in a responsive grid/list layout
+- [x] Each card shows cardName (or "Unnamed Card" if null), cardNumber, and barcodeType
+- [x] Empty state is shown when user has no cards (total = 0)
+- [x] Loading spinner is displayed while fetching cards
+- [x] Quick action buttons are available on each card (view, edit, delete)
 
 ---
 
