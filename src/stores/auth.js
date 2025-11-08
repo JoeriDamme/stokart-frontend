@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI } from '@/api/auth'
+import { setAuthCallbacks } from '@/api/axios'
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -97,9 +98,29 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('refreshToken')
   }
 
+  function setTokens(newAccessToken, newRefreshToken) {
+    // Update state
+    accessToken.value = newAccessToken
+    refreshToken.value = newRefreshToken
+
+    // Persist to localStorage
+    localStorage.setItem('accessToken', newAccessToken)
+    localStorage.setItem('refreshToken', newRefreshToken)
+  }
+
   function clearError() {
     error.value = null
   }
+
+  // Setup callbacks for axios interceptor
+  setAuthCallbacks({
+    onTokensRefreshed: (newAccessToken, newRefreshToken) => {
+      setTokens(newAccessToken, newRefreshToken)
+    },
+    onLogout: () => {
+      logout()
+    }
+  })
 
   return {
     // State
@@ -115,6 +136,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     login,
     logout,
+    setTokens,
     clearError
   }
 })

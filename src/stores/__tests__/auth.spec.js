@@ -248,4 +248,57 @@ describe('Auth Store', () => {
       expect(store.isAuthenticated).toBe(false)
     })
   })
+
+  describe('setTokens action (US-1.4: Automatic Token Refresh)', () => {
+    it('should update tokens in state and localStorage', () => {
+      const store = useAuthStore()
+
+      // Set initial tokens
+      store.accessToken = 'old-access-token'
+      store.refreshToken = 'old-refresh-token'
+
+      // Call setTokens with new tokens
+      store.setTokens('new-access-token', 'new-refresh-token')
+
+      // Verify state is updated
+      expect(store.accessToken).toBe('new-access-token')
+      expect(store.refreshToken).toBe('new-refresh-token')
+
+      // Verify localStorage is updated
+      expect(localStorage.getItem('accessToken')).toBe('new-access-token')
+      expect(localStorage.getItem('refreshToken')).toBe('new-refresh-token')
+    })
+
+    it('should update authentication status when tokens are set', () => {
+      const store = useAuthStore()
+
+      // Initially no token
+      expect(store.isAuthenticated).toBe(false)
+
+      // Set tokens
+      store.setTokens('new-access-token', 'new-refresh-token')
+
+      // Now authenticated
+      expect(store.isAuthenticated).toBe(true)
+    })
+
+    it('should replace existing tokens correctly', () => {
+      const store = useAuthStore()
+
+      // Set initial tokens
+      localStorage.setItem('accessToken', 'old-access')
+      localStorage.setItem('refreshToken', 'old-refresh')
+      store.accessToken = 'old-access'
+      store.refreshToken = 'old-refresh'
+
+      // Update with new tokens
+      store.setTokens('updated-access', 'updated-refresh')
+
+      // Verify old tokens are replaced
+      expect(store.accessToken).toBe('updated-access')
+      expect(store.refreshToken).toBe('updated-refresh')
+      expect(localStorage.getItem('accessToken')).toBe('updated-access')
+      expect(localStorage.getItem('refreshToken')).toBe('updated-refresh')
+    })
+  })
 })

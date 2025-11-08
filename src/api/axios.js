@@ -2,6 +2,15 @@ import axios from 'axios'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
+// Callbacks for store synchronization (set by the store)
+let onTokensRefreshed = null
+let onLogout = null
+
+export const setAuthCallbacks = (callbacks) => {
+  onTokensRefreshed = callbacks.onTokensRefreshed
+  onLogout = callbacks.onLogout
+}
+
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -48,9 +57,14 @@ apiClient.interceptors.response.use(
 
         const { accessToken, refreshToken: newRefreshToken } = response.data.data
 
-        // Store new tokens
+        // Store new tokens in localStorage
         localStorage.setItem('accessToken', accessToken)
         localStorage.setItem('refreshToken', newRefreshToken)
+
+        // Notify store of token refresh
+        if (onTokensRefreshed) {
+          onTokensRefreshed(accessToken, newRefreshToken)
+        }
 
         // Update the authorization header
         originalRequest.headers.Authorization = `Bearer ${accessToken}`
@@ -58,11 +72,16 @@ apiClient.interceptors.response.use(
         // Retry the original request
         return apiClient(originalRequest)
       } catch (refreshError) {
-        // Refresh failed, clear tokens and redirect to login
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        localStorage.removeItem('userId')
-        localStorage.removeItem('userEmail')
+        // Refresh failed, call logout callback if available
+        if (onLogout) {
+          onLogout()
+        } else {
+          // Fallback: clear tokens manually
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          localStorage.removeItem('userId')
+          localStorage.removeItem('userEmail')
+        }
 
         // Redirect to login page
         window.location.href = '/login'

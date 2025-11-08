@@ -160,12 +160,12 @@ POST /api/v1/auth/refresh
 - Must store the new refresh token to replace the old one
 
 **Acceptance Criteria:**
-- [ ] Axios interceptor catches 401 errors and triggers refresh
-- [ ] Refresh happens transparently without user interaction
-- [ ] Failed API requests are retried after token refresh
-- [ ] New accessToken and refreshToken replace old ones in store and localStorage
-- [ ] User is logged out if refresh token is invalid (401)
-- [ ] User is redirected to login if refresh fails
+- [x] Axios interceptor catches 401 errors and triggers refresh
+- [x] Refresh happens transparently without user interaction
+- [x] Failed API requests are retried after token refresh
+- [x] New accessToken and refreshToken replace old ones in store and localStorage
+- [x] User is logged out if refresh token is invalid (401)
+- [x] User is redirected to login if refresh fails
 
 ---
 
