@@ -6,30 +6,350 @@
     </div>
 
     <div class="create-card-content">
-      <p class="placeholder-message">
-        Card creation form will be implemented in US-3.1
-      </p>
-      <p class="info-text">
-        This page will contain a form to create new loyalty cards with fields for:
-      </p>
-      <ul class="feature-list">
-        <li>Card Number (required)</li>
-        <li>Card Name (optional)</li>
-        <li>Barcode Type (required): EAN8, EAN13, CODE128, QR, AZTEC, PDF417</li>
-        <li>Store ID (optional)</li>
-      </ul>
+      <form @submit.prevent="handleSubmit" class="card-form">
+        <!-- Card Number Field -->
+        <div class="form-group">
+          <label for="cardNumber">Card Number <span class="required">*</span></label>
+          <input
+            id="cardNumber"
+            v-model="formData.cardNumber"
+            type="text"
+            placeholder="Enter card number"
+            :class="{ 'error': errors.cardNumber }"
+            @blur="validateCardNumber"
+            @input="clearFieldError('cardNumber')"
+          />
+          <span v-if="errors.cardNumber" class="error-message">{{ errors.cardNumber }}</span>
+        </div>
+
+        <!-- Card Name Field -->
+        <div class="form-group">
+          <label for="cardName">Card Name</label>
+          <input
+            id="cardName"
+            v-model="formData.cardName"
+            type="text"
+            placeholder="Enter card name (optional)"
+            :class="{ 'error': errors.cardName }"
+            @input="clearFieldError('cardName')"
+          />
+          <span v-if="errors.cardName" class="error-message">{{ errors.cardName }}</span>
+          <span class="help-text">Optional - A friendly name for your card</span>
+        </div>
+
+        <!-- Barcode Type Field -->
+        <div class="form-group">
+          <label for="barcodeType">Barcode Type <span class="required">*</span></label>
+          <select
+            id="barcodeType"
+            v-model="formData.barcodeType"
+            :class="{ 'error': errors.barcodeType }"
+            @blur="validateBarcodeType"
+            @change="handleBarcodeTypeChange"
+          >
+            <option value="">Select barcode type</option>
+            <option value="EAN8">EAN8 (7-8 digits)</option>
+            <option value="EAN13">EAN13 (12-13 digits)</option>
+            <option value="CODE128">CODE128 (ASCII characters)</option>
+            <option value="QR">QR Code</option>
+            <option value="AZTEC">AZTEC Code</option>
+            <option value="PDF417">PDF417</option>
+          </select>
+          <span v-if="errors.barcodeType" class="error-message">{{ errors.barcodeType }}</span>
+        </div>
+
+        <!-- Store ID Field -->
+        <div class="form-group">
+          <label for="storeId">Store ID</label>
+          <input
+            id="storeId"
+            v-model="formData.storeId"
+            type="text"
+            placeholder="Enter store ID (optional)"
+            :class="{ 'error': errors.storeId }"
+            @blur="validateStoreId"
+            @input="clearFieldError('storeId')"
+          />
+          <span v-if="errors.storeId" class="error-message">{{ errors.storeId }}</span>
+          <span class="help-text">Optional - Must be a valid UUID v4</span>
+        </div>
+
+        <!-- Barcode Preview -->
+        <div v-if="showPreview" class="barcode-preview-section">
+          <h3>Barcode Preview</h3>
+          <div class="barcode-preview">
+            <div v-if="previewError" class="preview-error">
+              {{ previewError }}
+            </div>
+            <div v-else-if="formData.barcodeType === 'QR'" class="qr-preview">
+              <qrcode-vue
+                :value="formData.cardNumber"
+                :size="200"
+                level="M"
+              />
+            </div>
+            <div v-else-if="['EAN8', 'EAN13', 'CODE128'].includes(formData.barcodeType)" class="linear-preview">
+              <svg ref="barcodeCanvas"></svg>
+            </div>
+            <div v-else class="fallback-preview">
+              <p class="fallback-text">{{ formData.cardNumber }}</p>
+              <span class="fallback-info">{{ formData.barcodeType }} - Preview not available</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Error Message -->
+        <div v-if="apiError" class="api-error">
+          {{ apiError }}
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="submit-button"
+          :disabled="isLoading"
+        >
+          {{ isLoading ? 'Creating Card...' : 'Create Card' }}
+        </button>
+      </form>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref, computed, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCardsStore } from '@/stores/cards'
+import JsBarcode from 'jsbarcode'
+import QrcodeVue from 'qrcode.vue'
 
 const router = useRouter()
+const cardsStore = useCardsStore()
+
+const formData = ref({
+  cardNumber: '',
+  cardName: '',
+  barcodeType: '',
+  storeId: ''
+})
+
+const errors = ref({
+  cardNumber: '',
+  cardName: '',
+  barcodeType: '',
+  storeId: ''
+})
+
+const apiError = ref('')
+const previewError = ref('')
+const barcodeCanvas = ref(null)
+
+const isLoading = computed(() => cardsStore.isLoading)
+const showPreview = computed(() => formData.value.cardNumber && formData.value.barcodeType)
+
+// Validation functions
+function validateCardNumber() {
+  const cardNumber = formData.value.cardNumber.trim()
+  const barcodeType = formData.value.barcodeType
+
+  if (!cardNumber) {
+    errors.value.cardNumber = 'Card number is required'
+    return false
+  }
+
+  // Validate based on barcode type
+  if (barcodeType === 'EAN8') {
+    if (!/^\d{7,8}$/.test(cardNumber)) {
+      errors.value.cardNumber = 'EAN8 must be 7-8 digits only'
+      return false
+    }
+  } else if (barcodeType === 'EAN13') {
+    if (!/^\d{12,13}$/.test(cardNumber)) {
+      errors.value.cardNumber = 'EAN13 must be 12-13 digits only'
+      return false
+    }
+  } else if (barcodeType === 'CODE128') {
+    // Check for ASCII characters (printable ASCII range 32-126)
+    if (!/^[\x20-\x7E]+$/.test(cardNumber)) {
+      errors.value.cardNumber = 'CODE128 must contain only ASCII characters'
+      return false
+    }
+  }
+
+  // Generic length check
+  if (cardNumber.length > 255) {
+    errors.value.cardNumber = 'Card number must be less than 255 characters'
+    return false
+  }
+
+  errors.value.cardNumber = ''
+  return true
+}
+
+function validateBarcodeType() {
+  if (!formData.value.barcodeType) {
+    errors.value.barcodeType = 'Barcode type is required'
+    return false
+  }
+
+  const validTypes = ['EAN8', 'EAN13', 'CODE128', 'QR', 'AZTEC', 'PDF417']
+  if (!validTypes.includes(formData.value.barcodeType)) {
+    errors.value.barcodeType = 'Invalid barcode type'
+    return false
+  }
+
+  errors.value.barcodeType = ''
+  return true
+}
+
+function validateStoreId() {
+  const storeId = formData.value.storeId.trim()
+
+  // Optional field
+  if (!storeId) {
+    errors.value.storeId = ''
+    return true
+  }
+
+  // Validate UUID v4 format
+  const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  if (!uuidV4Regex.test(storeId)) {
+    errors.value.storeId = 'Must be a valid UUID v4 format'
+    return false
+  }
+
+  errors.value.storeId = ''
+  return true
+}
+
+function validateForm() {
+  const isCardNumberValid = validateCardNumber()
+  const isBarcodeTypeValid = validateBarcodeType()
+  const isStoreIdValid = validateStoreId()
+
+  // Card name validation (max 255 chars)
+  if (formData.value.cardName && formData.value.cardName.length > 255) {
+    errors.value.cardName = 'Card name must be less than 255 characters'
+    return false
+  }
+
+  return isCardNumberValid && isBarcodeTypeValid && isStoreIdValid
+}
+
+function clearFieldError(field) {
+  errors.value[field] = ''
+  apiError.value = ''
+
+  // Re-validate card number when typing if barcode type is selected
+  if (field === 'cardNumber' && formData.value.barcodeType) {
+    // Clear error immediately, will re-validate on blur
+    errors.value.cardNumber = ''
+  }
+}
+
+function handleBarcodeTypeChange() {
+  clearFieldError('barcodeType')
+  // Re-validate card number with new barcode type
+  if (formData.value.cardNumber) {
+    validateCardNumber()
+  }
+}
 
 function handleCancel() {
   router.push('/cards')
 }
+
+async function handleSubmit() {
+  // Clear previous errors
+  apiError.value = ''
+
+  // Validate form
+  if (!validateForm()) {
+    return
+  }
+
+  try {
+    // Prepare data for API
+    // Note: API requires all fields to be present, but allows null values for optional fields
+    const cardData = {
+      cardNumber: formData.value.cardNumber.trim(),
+      cardName: formData.value.cardName.trim() || null,
+      barcodeType: formData.value.barcodeType,
+      storeId: formData.value.storeId.trim() || null
+    }
+
+    const response = await cardsStore.createCard(cardData)
+    const createdCard = response.data
+
+    // Show success notification (you might want to add a toast/notification system)
+    console.log('Card created successfully:', createdCard)
+
+    // Redirect to cards list (detail view will be implemented in US-4.1)
+    router.push('/cards')
+  } catch (error) {
+    console.error('Failed to create card:', error)
+
+    // Handle specific error types
+    if (error.response?.status === 422) {
+      // Validation errors
+      const validationErrors = error.response.data?.errors
+      if (validationErrors) {
+        // Map API errors to form fields
+        Object.keys(validationErrors).forEach(field => {
+          if (errors.value.hasOwnProperty(field)) {
+            errors.value[field] = validationErrors[field][0]
+          }
+        })
+      } else {
+        apiError.value = error.response.data?.message || 'Validation failed. Please check your input.'
+      }
+    } else if (error.response?.status === 409) {
+      // Duplicate card error
+      apiError.value = 'A card with this number already exists for this store.'
+    } else {
+      // Generic error
+      apiError.value = error.response?.data?.message || 'Failed to create card. Please try again.'
+    }
+  }
+}
+
+// Generate barcode preview
+function generateBarcodePreview() {
+  if (!showPreview.value) {
+    return
+  }
+
+  if (['EAN8', 'EAN13', 'CODE128'].includes(formData.value.barcodeType)) {
+    nextTick(() => {
+      try {
+        if (barcodeCanvas.value) {
+          previewError.value = ''
+
+          const options = {
+            format: formData.value.barcodeType,
+            width: 2,
+            height: 100,
+            displayValue: true,
+            fontSize: 14,
+            margin: 10
+          }
+
+          JsBarcode(barcodeCanvas.value, formData.value.cardNumber, options)
+        }
+      } catch (error) {
+        previewError.value = 'Invalid barcode data for preview'
+      }
+    })
+  }
+}
+
+// Watch for changes to update barcode preview
+watch([() => formData.value.cardNumber, () => formData.value.barcodeType], () => {
+  previewError.value = ''
+  if (showPreview.value) {
+    generateBarcodePreview()
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
@@ -79,37 +399,148 @@ h1 {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.placeholder-message {
-  font-size: 18px;
-  color: #e67e22;
-  font-weight: 600;
+.card-form {
+  max-width: 600px;
+}
+
+.form-group {
   margin-bottom: 20px;
-  padding: 15px;
-  background: #fef5e7;
-  border-left: 4px solid #e67e22;
-  border-radius: 4px;
 }
 
-.info-text {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 15px;
-}
-
-.feature-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.feature-list li {
-  padding: 10px 15px;
-  margin-bottom: 10px;
-  background: #f9f9f9;
-  border-left: 3px solid #3498db;
-  border-radius: 4px;
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
   color: #333;
   font-size: 14px;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.form-group input.error,
+.form-group select.error {
+  border-color: #e74c3c;
+}
+
+.error-message {
+  display: block;
+  color: #e74c3c;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.help-text {
+  display: block;
+  color: #7f8c8d;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.barcode-preview-section {
+  margin: 30px 0;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 2px dashed #ddd;
+}
+
+.barcode-preview-section h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 16px;
+}
+
+.barcode-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+  background: white;
+  border-radius: 6px;
+  padding: 20px;
+}
+
+.preview-error {
+  color: #e74c3c;
+  font-size: 14px;
+  text-align: center;
+}
+
+.qr-preview,
+.linear-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.fallback-preview {
+  text-align: center;
+}
+
+.fallback-text {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+
+.fallback-info {
+  display: block;
+  color: #7f8c8d;
+  font-size: 12px;
+}
+
+.api-error {
+  padding: 15px;
+  background: #fee;
+  border: 1px solid #fcc;
+  border-radius: 6px;
+  color: #c33;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 14px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.submit-button:hover:not(:disabled) {
+  background: #2980b9;
+}
+
+.submit-button:disabled {
+  background: #bdc3c7;
+  cursor: not-allowed;
 }
 
 /* Responsive Design */
@@ -134,6 +565,10 @@ h1 {
 
   .cancel-button {
     width: 100%;
+  }
+
+  .card-form {
+    max-width: 100%;
   }
 }
 </style>

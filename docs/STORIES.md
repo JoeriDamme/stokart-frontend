@@ -322,14 +322,14 @@ POST /api/v1/cards
 - 409: Duplicate card (same cardNumber and storeId for same user)
 
 **Acceptance Criteria:**
-- [ ] Form has fields for card number (required), card name (optional), barcode type (required), and store ID (optional)
-- [ ] Barcode type dropdown includes: EAN8, EAN13, CODE128, QR, AZTEC, PDF417
-- [ ] Client-side validation matches API requirements (EAN8: 7-8 digits, EAN13: 12-13 digits)
-- [ ] Real-time barcode preview updates as user types
-- [ ] Success notification is shown after card creation
-- [ ] User is redirected to card detail view after creation (/cards/{id})
-- [ ] API validation errors are displayed inline (422 errors)
-- [ ] Duplicate card error is handled gracefully (409)
+- [x] Form has fields for card number (required), card name (optional), barcode type (required), and store ID (optional)
+- [x] Barcode type dropdown includes: EAN8, EAN13, CODE128, QR, AZTEC, PDF417
+- [x] Client-side validation matches API requirements (EAN8: 7-8 digits, EAN13: 12-13 digits)
+- [x] Real-time barcode preview updates as user types
+- [x] Success notification is shown after card creation
+- [x] User is redirected to cards list after creation (detail view pending US-4.1)
+- [x] API validation errors are displayed inline (422 errors)
+- [x] Duplicate card error is handled gracefully (409)
 
 ---
 
@@ -339,10 +339,10 @@ POST /api/v1/cards
 **So that** I can verify I entered the correct information
 
 **Acceptance Criteria:**
-- [ ] Barcode preview updates in real-time as user types
-- [ ] Preview shows correct barcode type
-- [ ] Invalid barcode formats show helpful error message
-- [ ] Preview is responsive and properly sized
+- [x] Barcode preview updates in real-time as user types
+- [x] Preview shows correct barcode type
+- [x] Invalid barcode formats show helpful error message
+- [x] Preview is responsive and properly sized
 
 ---
 
