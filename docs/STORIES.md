@@ -260,10 +260,10 @@ GET /api/v1/cards?page={page}&limit={limit}
 **So that** I can easily expand my card collection
 
 **Acceptance Criteria:**
-- [ ] "Add Card" button is prominently displayed
-- [ ] Button is accessible from cards list view
-- [ ] Clicking button navigates to card creation form
-- [ ] Button has clear icon and label
+- [x] "Add Card" button is prominently displayed
+- [x] Button is accessible from cards list view
+- [x] Clicking button navigates to card creation form
+- [x] Button has clear icon and label
 
 ---
 

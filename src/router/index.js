@@ -3,6 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 import RegisterView from '@/views/RegisterView.vue'
 import LoginView from '@/views/LoginView.vue'
 import CardsView from '@/views/CardsView.vue'
+import CreateCardView from '@/views/CreateCardView.vue'
 
 const routes = [
   {
@@ -25,6 +26,12 @@ const routes = [
     path: '/cards',
     name: 'cards',
     component: CardsView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cards/new',
+    name: 'create-card',
+    component: CreateCardView,
     meta: { requiresAuth: true }
   }
 ]

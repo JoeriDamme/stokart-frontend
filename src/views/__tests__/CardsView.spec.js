@@ -539,4 +539,138 @@ describe('CardsView', () => {
       expect(activePage.text()).toBe('2')
     })
   })
+
+  describe('US-2.3: Navigate to Card Creation', () => {
+    beforeEach(() => {
+      // Set up authenticated user for all tests
+      localStorage.setItem('userId', 'user-123')
+      localStorage.setItem('userEmail', 'test@example.com')
+      localStorage.setItem('accessToken', 'test-token')
+      localStorage.setItem('refreshToken', 'refresh-token')
+    })
+
+    it('should display "Add Card" button prominently in empty state', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = []
+      cardsStore.pagination = { total: 0, currentPage: 1, lastPage: 1, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const addButton = wrapper.find('.add-card-button-large')
+      expect(addButton.exists()).toBe(true)
+      expect(addButton.text()).toContain('Add')
+      expect(addButton.isVisible()).toBe(true)
+    })
+
+    it('should display "Add Card" button in cards list view', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        {
+          id: 'card-1',
+          cardName: 'Test Card',
+          cardNumber: '1234567890',
+          barcodeType: 'EAN13'
+        }
+      ]
+      cardsStore.pagination = { total: 1, currentPage: 1, lastPage: 1, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const addButton = wrapper.find('.add-card-button')
+      expect(addButton.exists()).toBe(true)
+      expect(addButton.text()).toContain('Add Card')
+    })
+
+    it('should have clear icon and label on Add Card button', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        {
+          id: 'card-1',
+          cardName: 'Test Card',
+          cardNumber: '1234567890',
+          barcodeType: 'EAN13'
+        }
+      ]
+      cardsStore.pagination = { total: 1, currentPage: 1, lastPage: 1, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const addButton = wrapper.find('.add-card-button')
+      expect(addButton.text()).toBe('+ Add Card')
+    })
+
+    it('should navigate to card creation form when Add Card button is clicked from list view', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        {
+          id: 'card-1',
+          cardName: 'Test Card',
+          cardNumber: '1234567890',
+          barcodeType: 'EAN13'
+        }
+      ]
+      cardsStore.pagination = { total: 1, currentPage: 1, lastPage: 1, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const pushSpy = vi.spyOn(router, 'push')
+      const addButton = wrapper.find('.add-card-button')
+
+      await addButton.trigger('click')
+      await flushPromises()
+
+      expect(pushSpy).toHaveBeenCalledWith('/cards/new')
+    })
+
+    it('should navigate to card creation form when Add Card button is clicked from empty state', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = []
+      cardsStore.pagination = { total: 0, currentPage: 1, lastPage: 1, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const pushSpy = vi.spyOn(router, 'push')
+      const addButton = wrapper.find('.add-card-button-large')
+
+      await addButton.trigger('click')
+      await flushPromises()
+
+      expect(pushSpy).toHaveBeenCalledWith('/cards/new')
+    })
+  })
 })

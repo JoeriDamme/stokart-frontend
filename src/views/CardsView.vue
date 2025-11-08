@@ -253,8 +253,7 @@ function handleLogout() {
 }
 
 function handleAddCard() {
-  // TODO: Navigate to card creation page (US-2.3 and US-3.1)
-  console.log('Add card - to be implemented')
+  router.push('/cards/new')
 }
 
 function handleViewCard(cardId) {
