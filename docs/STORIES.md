@@ -118,10 +118,10 @@ POST /api/v1/auth/login
 **So that** I can secure my account when done
 
 **Acceptance Criteria:**
-- [ ] Logout button is visible in the app bar
-- [ ] Clicking logout clears all tokens from localStorage
-- [ ] User is redirected to login page after logout
-- [ ] User state is cleared from Pinia store
+- [x] Logout button is visible in the app bar
+- [x] Clicking logout clears all tokens from localStorage
+- [x] User is redirected to login page after logout
+- [x] User state is cleared from Pinia store
 
 ---
 
