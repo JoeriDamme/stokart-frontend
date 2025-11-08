@@ -175,10 +175,10 @@ POST /api/v1/auth/refresh
 **So that** only authenticated users can access their data
 
 **Acceptance Criteria:**
-- [ ] Unauthenticated users are redirected to login when accessing /cards
-- [ ] Authenticated users are redirected away from /login and /register
-- [ ] Navigation guard checks authentication state before route change
-- [ ] Original destination is preserved for post-login redirect
+- [x] Unauthenticated users are redirected to login when accessing /cards
+- [x] Authenticated users are redirected away from /login and /register
+- [x] Navigation guard checks authentication state before route change
+- [x] Original destination is preserved for post-login redirect
 
 ---
 
