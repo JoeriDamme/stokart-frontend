@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import CardsView from '../CardsView.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useCardsStore } from '@/stores/cards'
 
 describe('CardsView', () => {
   let router
@@ -169,6 +170,373 @@ describe('CardsView', () => {
       expect(authStore.refreshToken).toBe(null)
       expect(authStore.error).toBe(null)
       expect(authStore.isAuthenticated).toBe(false)
+    })
+  })
+
+  describe('US-2.1: View All Cards', () => {
+    beforeEach(() => {
+      // Set up authenticated user for all tests
+      localStorage.setItem('userId', 'user-123')
+      localStorage.setItem('userEmail', 'test@example.com')
+      localStorage.setItem('accessToken', 'test-token')
+      localStorage.setItem('refreshToken', 'refresh-token')
+    })
+
+    it('should display loading spinner while fetching cards', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = true
+
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.loading-container').exists()).toBe(true)
+      expect(wrapper.find('.spinner').exists()).toBe(true)
+      expect(wrapper.text()).toContain('Loading your cards...')
+    })
+
+    it('should display empty state when user has no cards', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = []
+      cardsStore.pagination = { total: 0, currentPage: 1, lastPage: 1, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.empty-state').exists()).toBe(true)
+      expect(wrapper.text()).toContain('No cards yet')
+      expect(wrapper.text()).toContain('Start adding your loyalty cards')
+      expect(wrapper.find('.add-card-button-large').exists()).toBe(true)
+    })
+
+    it('should display cards in a grid when cards are available', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        {
+          id: 'card-1',
+          cardName: 'Supermarket Card',
+          cardNumber: '1234567890123',
+          barcodeType: 'EAN13'
+        },
+        {
+          id: 'card-2',
+          cardName: null,
+          cardNumber: '9876543210',
+          barcodeType: 'CODE128'
+        }
+      ]
+      cardsStore.pagination = { total: 2, currentPage: 1, lastPage: 1, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.cards-grid').exists()).toBe(true)
+      expect(wrapper.findAll('.card-item').length).toBe(2)
+
+      // Check first card
+      const firstCard = wrapper.findAll('.card-item')[0]
+      expect(firstCard.find('.card-name').text()).toBe('Supermarket Card')
+      expect(firstCard.find('.card-number').text()).toBe('1234567890123')
+      expect(firstCard.find('.card-barcode-type').text()).toBe('EAN13')
+
+      // Check second card (unnamed)
+      const secondCard = wrapper.findAll('.card-item')[1]
+      expect(secondCard.find('.card-name').text()).toBe('Unnamed Card')
+      expect(secondCard.find('.card-number').text()).toBe('9876543210')
+    })
+
+    it('should display quick action buttons on each card', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        {
+          id: 'card-1',
+          cardName: 'Test Card',
+          cardNumber: '1234567890',
+          barcodeType: 'EAN13'
+        }
+      ]
+      cardsStore.pagination = { total: 1, currentPage: 1, lastPage: 1, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const cardItem = wrapper.find('.card-item')
+      expect(cardItem.find('.view-button').exists()).toBe(true)
+      expect(cardItem.find('.edit-button').exists()).toBe(true)
+      expect(cardItem.find('.delete-button').exists()).toBe(true)
+    })
+
+    it('should show total cards count', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' },
+        { id: 'card-2', cardName: 'Card 2', cardNumber: '456', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 1, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.cards-count').text()).toBe('45 cards')
+    })
+  })
+
+  describe('US-2.2: Pagination', () => {
+    beforeEach(() => {
+      // Set up authenticated user for all tests
+      localStorage.setItem('userId', 'user-123')
+      localStorage.setItem('userEmail', 'test@example.com')
+      localStorage.setItem('accessToken', 'test-token')
+      localStorage.setItem('refreshToken', 'refresh-token')
+    })
+
+    it('should display pagination controls when cards are available', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 1, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.pagination-container').exists()).toBe(true)
+      expect(wrapper.find('.pagination-controls').exists()).toBe(true)
+    })
+
+    it('should show current page and total pages', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 2, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      expect(wrapper.find('.pagination-info').text()).toContain('Page 2 of 3')
+    })
+
+    it('should display page size selector with options', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 1, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const selector = wrapper.find('.page-size-selector')
+      expect(selector.exists()).toBe(true)
+
+      const options = selector.findAll('option')
+      expect(options.length).toBe(3)
+      expect(options[0].text()).toBe('20 per page')
+      expect(options[1].text()).toBe('50 per page')
+      expect(options[2].text()).toBe('100 per page')
+    })
+
+    it('should disable Previous button on first page', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 1, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const buttons = wrapper.findAll('.pagination-button')
+      const firstButton = buttons.find(btn => btn.text() === 'First')
+      const prevButton = buttons.find(btn => btn.text() === 'Previous')
+
+      expect(firstButton.attributes('disabled')).toBeDefined()
+      expect(prevButton.attributes('disabled')).toBeDefined()
+    })
+
+    it('should disable Next button on last page', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 3, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const buttons = wrapper.findAll('.pagination-button')
+      const nextButton = buttons.find(btn => btn.text() === 'Next')
+      const lastButton = buttons.find(btn => btn.text() === 'Last')
+
+      expect(nextButton.attributes('disabled')).toBeDefined()
+      expect(lastButton.attributes('disabled')).toBeDefined()
+    })
+
+    it('should navigate to next page when Next button is clicked', async () => {
+      await router.push('/cards?page=1&limit=20')
+      await router.isReady()
+
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 1, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const buttons = wrapper.findAll('.pagination-button')
+      const nextButton = buttons.find(btn => btn.text() === 'Next')
+
+      await nextButton.trigger('click')
+      await flushPromises()
+
+      expect(router.currentRoute.value.query.page).toBe('2')
+    })
+
+    it('should navigate to previous page when Previous button is clicked', async () => {
+      await router.push('/cards?page=2&limit=20')
+      await router.isReady()
+
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 2, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const buttons = wrapper.findAll('.pagination-button')
+      const prevButton = buttons.find(btn => btn.text() === 'Previous')
+
+      await prevButton.trigger('click')
+      await flushPromises()
+
+      expect(router.currentRoute.value.query.page).toBe('1')
+    })
+
+    it('should navigate to specific page when page number is clicked', async () => {
+      await router.push('/cards?page=1&limit=20')
+      await router.isReady()
+
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 1, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const pageButtons = wrapper.findAll('.page-number-button')
+      const page3Button = pageButtons.find(btn => btn.text() === '3')
+
+      if (page3Button) {
+        await page3Button.trigger('click')
+        await flushPromises()
+
+        expect(router.currentRoute.value.query.page).toBe('3')
+      }
+    })
+
+    it('should highlight current page number button', async () => {
+      const wrapper = mount(CardsView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      const cardsStore = useCardsStore()
+      cardsStore.isLoading = false
+      cardsStore.cards = [
+        { id: 'card-1', cardName: 'Card 1', cardNumber: '123', barcodeType: 'EAN13' }
+      ]
+      cardsStore.pagination = { total: 45, currentPage: 2, lastPage: 3, perPage: 20 }
+
+      await wrapper.vm.$nextTick()
+
+      const pageButtons = wrapper.findAll('.page-number-button')
+      const activePage = pageButtons.find(btn => btn.classes('active'))
+
+      expect(activePage.text()).toBe('2')
     })
   })
 })

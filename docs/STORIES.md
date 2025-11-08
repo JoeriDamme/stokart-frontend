@@ -244,13 +244,13 @@ GET /api/v1/cards?page={page}&limit={limit}
 **So that** I can efficiently browse a large collection
 
 **Acceptance Criteria:**
-- [ ] Pagination controls are displayed below the cards list
-- [ ] Current page number and total pages are shown (use pagination.currentPage and pagination.lastPage)
-- [ ] Next/Previous buttons work correctly
-- [ ] Direct page number selection is available
-- [ ] Pagination state persists during session
-- [ ] Default page size is 20 cards (can be changed up to 100)
-- [ ] Update URL query parameters with current page
+- [x] Pagination controls are displayed below the cards list
+- [x] Current page number and total pages are shown (use pagination.currentPage and pagination.lastPage)
+- [x] Next/Previous buttons work correctly
+- [x] Direct page number selection is available
+- [x] Pagination state persists during session
+- [x] Default page size is 20 cards (can be changed up to 100)
+- [x] Update URL query parameters with current page
 
 ---
 

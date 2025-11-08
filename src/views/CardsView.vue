@@ -73,28 +73,179 @@
             </div>
           </div>
         </div>
+
+        <!-- Pagination Controls -->
+        <div class="pagination-container">
+          <div class="pagination-info">
+            <span>Page {{ cardsStore.pagination.currentPage }} of {{ cardsStore.pagination.lastPage }}</span>
+            <select v-model.number="limit" @change="handleLimitChange" class="page-size-selector">
+              <option :value="20">20 per page</option>
+              <option :value="50">50 per page</option>
+              <option :value="100">100 per page</option>
+            </select>
+          </div>
+
+          <div class="pagination-controls">
+            <button
+              @click="goToPage(1)"
+              :disabled="cardsStore.pagination.currentPage === 1"
+              class="pagination-button"
+            >
+              First
+            </button>
+            <button
+              @click="goToPage(cardsStore.pagination.currentPage - 1)"
+              :disabled="cardsStore.pagination.currentPage === 1"
+              class="pagination-button"
+            >
+              Previous
+            </button>
+
+            <!-- Page number buttons -->
+            <div class="page-numbers">
+              <button
+                v-for="page in visiblePages"
+                :key="page"
+                @click="goToPage(page)"
+                :class="['page-number-button', { active: page === cardsStore.pagination.currentPage }]"
+              >
+                {{ page }}
+              </button>
+            </div>
+
+            <button
+              @click="goToPage(cardsStore.pagination.currentPage + 1)"
+              :disabled="cardsStore.pagination.currentPage === cardsStore.pagination.lastPage"
+              class="pagination-button"
+            >
+              Next
+            </button>
+            <button
+              @click="goToPage(cardsStore.pagination.lastPage)"
+              :disabled="cardsStore.pagination.currentPage === cardsStore.pagination.lastPage"
+              class="pagination-button"
+            >
+              Last
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { onMounted, ref, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCardsStore } from '@/stores/cards'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const cardsStore = useCardsStore()
 
+// Pagination state
+const limit = ref(20)
+
+// Computed property for visible page numbers
+const visiblePages = computed(() => {
+  const currentPage = cardsStore.pagination.currentPage
+  const lastPage = cardsStore.pagination.lastPage
+  const pages = []
+
+  if (lastPage <= 7) {
+    // Show all pages if there are 7 or fewer
+    for (let i = 1; i <= lastPage; i++) {
+      pages.push(i)
+    }
+  } else {
+    // Show first page, last page, and pages around current page
+    if (currentPage <= 3) {
+      // Near the beginning
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push('...')
+      pages.push(lastPage)
+    } else if (currentPage >= lastPage - 2) {
+      // Near the end
+      pages.push(1)
+      pages.push('...')
+      for (let i = lastPage - 4; i <= lastPage; i++) {
+        pages.push(i)
+      }
+    } else {
+      // In the middle
+      pages.push(1)
+      pages.push('...')
+      for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+        pages.push(i)
+      }
+      pages.push('...')
+      pages.push(lastPage)
+    }
+  }
+
+  return pages.filter(page => page !== '...')
+})
+
 onMounted(async () => {
+  // Get page and limit from URL query parameters
+  const pageFromUrl = parseInt(route.query.page) || 1
+  const limitFromUrl = parseInt(route.query.limit) || 20
+
+  // Validate limit
+  if ([20, 50, 100].includes(limitFromUrl)) {
+    limit.value = limitFromUrl
+  }
+
   try {
-    await cardsStore.fetchCards()
+    await cardsStore.fetchCards(pageFromUrl, limit.value)
   } catch (error) {
     console.error('Failed to fetch cards:', error)
   }
 })
+
+// Watch for route changes (e.g., browser back/forward buttons)
+watch(() => route.query, async (newQuery) => {
+  const page = parseInt(newQuery.page) || 1
+  const newLimit = parseInt(newQuery.limit) || 20
+
+  if ([20, 50, 100].includes(newLimit) && newLimit !== limit.value) {
+    limit.value = newLimit
+  }
+
+  try {
+    await cardsStore.fetchCards(page, limit.value)
+  } catch (error) {
+    console.error('Failed to fetch cards:', error)
+  }
+}, { deep: true })
+
+async function goToPage(page) {
+  if (typeof page !== 'number' || page < 1 || page > cardsStore.pagination.lastPage) {
+    return
+  }
+
+  // Update URL query parameters
+  await router.push({
+    query: {
+      page,
+      limit: limit.value
+    }
+  })
+}
+
+async function handleLimitChange() {
+  // Reset to page 1 when changing limit
+  await router.push({
+    query: {
+      page: 1,
+      limit: limit.value
+    }
+  })
+}
 
 function handleLogout() {
   authStore.logout()
@@ -124,6 +275,10 @@ async function handleDeleteCard(cardId, cardName) {
     try {
       await cardsStore.deleteCard(cardId)
       console.log('Card deleted successfully')
+
+      // Refresh current page after deletion
+      const currentPage = cardsStore.pagination.currentPage
+      await cardsStore.fetchCards(currentPage, limit.value)
     } catch (error) {
       console.error('Failed to delete card:', error)
       alert('Failed to delete card. Please try again.')
@@ -377,6 +532,101 @@ h1 {
   background: #c0392b;
 }
 
+/* Pagination */
+.pagination-container {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
+.pagination-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+.page-size-selector {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.page-size-selector:hover {
+  border-color: #3498db;
+}
+
+.page-size-selector:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-button {
+  padding: 8px 16px;
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.pagination-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 5px;
+}
+
+.page-number-button {
+  min-width: 40px;
+  padding: 8px 12px;
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.page-number-button:hover {
+  background: #f0f0f0;
+  border-color: #3498db;
+}
+
+.page-number-button.active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .cards-container {
@@ -409,6 +659,27 @@ h1 {
 
   .add-card-button {
     width: 100%;
+  }
+
+  .pagination-info {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .pagination-controls {
+    gap: 5px;
+  }
+
+  .pagination-button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .page-number-button {
+    min-width: 35px;
+    padding: 6px 8px;
+    font-size: 12px;
   }
 }
 </style>
