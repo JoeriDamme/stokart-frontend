@@ -43,7 +43,21 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">Card Number:</span>
-              <span class="info-value">{{ card.cardNumber }}</span>
+              <div class="info-value-with-action">
+                <span class="info-value">{{ card.cardNumber }}</span>
+                <button
+                  @click="copyCardNumber"
+                  class="copy-button"
+                  title="Copy card number"
+                  aria-label="Copy card number to clipboard"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  Copy
+                </button>
+              </div>
             </div>
             <div class="info-item">
               <span class="info-label">Barcode Type:</span>
@@ -96,12 +110,14 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
+import { useNotification } from '@/composables/useNotification'
 import JsBarcode from 'jsbarcode'
 import QrcodeVue from 'qrcode.vue'
 
 const router = useRouter()
 const route = useRoute()
 const cardsStore = useCardsStore()
+const { success, error: showError } = useNotification()
 
 const barcodeCanvas = ref(null)
 const barcodeError = ref('')
@@ -129,6 +145,35 @@ function formatDate(timestamp) {
   }
 
   return date.toLocaleDateString('en-US', options)
+}
+
+// Copy card number to clipboard
+async function copyCardNumber() {
+  if (!card.value?.cardNumber) return
+
+  try {
+    // Check if clipboard API is available
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(card.value.cardNumber)
+    } else {
+      // Fallback for older browsers or non-secure contexts
+      const textArea = document.createElement('textarea')
+      textArea.value = card.value.cardNumber
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-999999px'
+      textArea.style.top = '-999999px'
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+      document.execCommand('copy')
+      textArea.remove()
+    }
+
+    success('Card number copied to clipboard!')
+  } catch (err) {
+    console.error('Failed to copy card number:', err)
+    showError('Failed to copy card number')
+  }
 }
 
 // Generate barcode for linear barcode types
@@ -401,6 +446,43 @@ onMounted(() => {
   color: #333;
   font-size: 14px;
   word-break: break-all;
+}
+
+.info-value-with-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.copy-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.copy-button:hover {
+  background: #2980b9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+.copy-button:active {
+  transform: translateY(0);
+}
+
+.copy-button svg {
+  flex-shrink: 0;
 }
 
 /* Barcode Display */

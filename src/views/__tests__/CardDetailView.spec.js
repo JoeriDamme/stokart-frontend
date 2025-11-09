@@ -671,6 +671,176 @@ describe('CardDetailView', () => {
     })
   })
 
+  describe('Copy Card Number Functionality', () => {
+    let mockClipboard
+
+    beforeEach(() => {
+      // Mock navigator.clipboard API
+      mockClipboard = {
+        writeText: vi.fn().mockResolvedValue()
+      }
+
+      // Use Object.defineProperty to mock clipboard
+      Object.defineProperty(navigator, 'clipboard', {
+        value: mockClipboard,
+        writable: true,
+        configurable: true
+      })
+
+      // Mock isSecureContext
+      Object.defineProperty(window, 'isSecureContext', {
+        value: true,
+        writable: true,
+        configurable: true
+      })
+    })
+
+    it('should display copy button next to card number', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'Test Card',
+        barcodeType: 'EAN13',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const copyButton = wrapper.find('.copy-button')
+      expect(copyButton.exists()).toBe(true)
+      expect(copyButton.text()).toContain('Copy')
+    })
+
+    it('should copy card number to clipboard when copy button is clicked', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'Test Card',
+        barcodeType: 'EAN13',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const copyButton = wrapper.find('.copy-button')
+      await copyButton.trigger('click')
+      await flushPromises()
+
+      expect(mockClipboard.writeText).toHaveBeenCalledWith('1234567890123')
+    })
+
+    it('should use fallback method when clipboard API is not available', async () => {
+      // Mock clipboard API as unavailable
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        writable: true,
+        configurable: true
+      })
+
+      Object.defineProperty(window, 'isSecureContext', {
+        value: false,
+        writable: true,
+        configurable: true
+      })
+
+      // Mock document.execCommand
+      document.execCommand = vi.fn().mockReturnValue(true)
+
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'Test Card',
+        barcodeType: 'EAN13',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const copyButton = wrapper.find('.copy-button')
+      await copyButton.trigger('click')
+      await flushPromises()
+
+      expect(document.execCommand).toHaveBeenCalledWith('copy')
+    })
+
+    it('should not attempt to copy when card number is not available', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: null,
+        cardName: 'Test Card',
+        barcodeType: 'EAN13',
+        barcodeData: null,
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Button should still exist but clicking shouldn't call clipboard
+      const copyButton = wrapper.find('.copy-button')
+      if (copyButton.exists()) {
+        await copyButton.trigger('click')
+        await flushPromises()
+
+        expect(mockClipboard.writeText).not.toHaveBeenCalled()
+      }
+    })
+  })
+
   describe('API Integration', () => {
     it('should call cardsAPI.getCard with correct card ID', async () => {
       const mockCard = {

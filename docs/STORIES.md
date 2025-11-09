@@ -410,10 +410,10 @@ GET /api/v1/cards/{id}
 **So that** I can paste it when shopping online
 
 **Acceptance Criteria:**
-- [ ] Copy button is visible near card number
-- [ ] Clicking button copies number to clipboard
-- [ ] Success notification confirms copy action
-- [ ] Works on mobile and desktop browsers
+- [x] Copy button is visible near card number
+- [x] Clicking button copies number to clipboard
+- [x] Success notification confirms copy action
+- [x] Works on mobile and desktop browsers
 
 ---
 
