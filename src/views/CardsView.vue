@@ -257,8 +257,7 @@ function handleAddCard() {
 }
 
 function handleViewCard(cardId) {
-  // TODO: Navigate to card detail page (US-4.1)
-  console.log('View card:', cardId)
+  router.push(`/cards/${cardId}`)
 }
 
 function handleEditCard(cardId) {

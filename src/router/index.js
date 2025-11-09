@@ -4,6 +4,7 @@ import RegisterView from '@/views/RegisterView.vue'
 import LoginView from '@/views/LoginView.vue'
 import CardsView from '@/views/CardsView.vue'
 import CreateCardView from '@/views/CreateCardView.vue'
+import CardDetailView from '@/views/CardDetailView.vue'
 
 const routes = [
   {
@@ -32,6 +33,12 @@ const routes = [
     path: '/cards/new',
     name: 'create-card',
     component: CreateCardView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cards/:id',
+    name: 'card-detail',
+    component: CardDetailView,
     meta: { requiresAuth: true }
   }
 ]

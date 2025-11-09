@@ -379,13 +379,13 @@ GET /api/v1/cards/{id}
 - 401: Not authenticated
 
 **Acceptance Criteria:**
-- [ ] Card detail page shows cardName (or "Unnamed Card" if null), cardNumber, barcodeType, barcodeData
-- [ ] Full-size barcode is prominently displayed using barcodeData and barcodeType
-- [ ] Barcode is rendered in high resolution for scanning
-- [ ] Display createdAt and updatedAt timestamps (formatted as readable dates)
-- [ ] Edit and delete buttons are available
-- [ ] Back button returns to cards list
-- [ ] Handle 404 errors gracefully (redirect to cards list or show error)
+- [x] Card detail page shows cardName (or "Unnamed Card" if null), cardNumber, barcodeType, barcodeData
+- [x] Full-size barcode is prominently displayed using barcodeData and barcodeType
+- [x] Barcode is rendered in high resolution for scanning
+- [x] Display createdAt and updatedAt timestamps (formatted as readable dates)
+- [x] Edit and delete buttons are available
+- [x] Back button returns to cards list
+- [x] Handle 404 errors gracefully (redirect to cards list or show error)
 
 ---
 
@@ -395,12 +395,12 @@ GET /api/v1/cards/{id}
 **So that** they can be scanned at stores
 
 **Acceptance Criteria:**
-- [ ] EAN8 barcodes render correctly using jsbarcode
-- [ ] EAN13 barcodes render correctly using jsbarcode
-- [ ] CODE128 barcodes render correctly using jsbarcode
-- [ ] QR codes render correctly using vue-qrcode-component
-- [ ] AZTEC and PDF417 show fallback display (text-based)
-- [ ] Barcode is large enough to scan from phone screen
+- [x] EAN8 barcodes render correctly using jsbarcode
+- [x] EAN13 barcodes render correctly using jsbarcode
+- [x] CODE128 barcodes render correctly using jsbarcode
+- [x] QR codes render correctly using vue-qrcode-component
+- [x] AZTEC and PDF417 show fallback display (text-based)
+- [x] Barcode is large enough to scan from phone screen
 
 ---
 
