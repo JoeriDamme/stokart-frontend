@@ -80,13 +80,29 @@
 
         <!-- Barcode Display -->
         <div class="barcode-section">
-          <h2>Barcode</h2>
+          <div class="barcode-header">
+            <h2>Barcode</h2>
+            <button
+              @click="downloadBarcode"
+              class="download-button"
+              title="Download barcode"
+              aria-label="Download barcode as image"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              Download
+            </button>
+          </div>
           <div class="barcode-display">
             <div v-if="barcodeError" class="barcode-error">
               {{ barcodeError }}
             </div>
             <div v-else-if="card.barcodeType === 'QR'" class="qr-display">
               <qrcode-vue
+                ref="qrcodeRef"
                 :value="card.barcodeData"
                 :size="300"
                 level="M"
@@ -120,6 +136,7 @@ const cardsStore = useCardsStore()
 const { success, error: showError } = useNotification()
 
 const barcodeCanvas = ref(null)
+const qrcodeRef = ref(null)
 const barcodeError = ref('')
 
 const isLoading = computed(() => cardsStore.isLoading)
@@ -174,6 +191,166 @@ async function copyCardNumber() {
     console.error('Failed to copy card number:', err)
     showError('Failed to copy card number')
   }
+}
+
+// Download barcode as image
+async function downloadBarcode() {
+  if (!card.value) return
+
+  try {
+    const filename = generateFilename()
+
+    if (card.value.barcodeType === 'QR') {
+      await downloadQRCode(filename)
+    } else if (['EAN8', 'EAN13', 'CODE128'].includes(card.value.barcodeType)) {
+      await downloadLinearBarcode(filename)
+    } else {
+      await downloadFallbackBarcode(filename)
+    }
+
+    success('Barcode downloaded successfully!')
+  } catch (err) {
+    console.error('Failed to download barcode:', err)
+    showError('Failed to download barcode')
+  }
+}
+
+// Generate meaningful filename
+function generateFilename() {
+  const cardName = card.value.cardName || 'unnamed-card'
+  const sanitizedName = cardName
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+
+  return `${sanitizedName}-barcode.png`
+}
+
+// Download QR code
+async function downloadQRCode(filename) {
+  // Get the canvas element from the QR code component
+  const qrCanvas = qrcodeRef.value?.$el?.querySelector('canvas')
+
+  if (!qrCanvas) {
+    throw new Error('QR code canvas not found')
+  }
+
+  // Convert canvas to blob and download
+  qrCanvas.toBlob((blob) => {
+    if (!blob) {
+      throw new Error('Failed to create blob from canvas')
+    }
+
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    link.click()
+    URL.revokeObjectURL(url)
+  }, 'image/png')
+}
+
+// Download linear barcode (EAN8, EAN13, CODE128)
+async function downloadLinearBarcode(filename) {
+  if (!barcodeCanvas.value) {
+    throw new Error('Barcode SVG not found')
+  }
+
+  // Get SVG element
+  const svgElement = barcodeCanvas.value
+  const svgData = new XMLSerializer().serializeToString(svgElement)
+
+  // Get SVG dimensions
+  const bbox = svgElement.getBBox()
+  const width = bbox.width + 30 // Add padding
+  const height = bbox.height + 30
+
+  // Create canvas
+  const canvas = document.createElement('canvas')
+  canvas.width = width
+  canvas.height = height
+  const ctx = canvas.getContext('2d')
+
+  // Set white background
+  ctx.fillStyle = 'white'
+  ctx.fillRect(0, 0, width, height)
+
+  // Create image from SVG
+  const img = new Image()
+  const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+  const url = URL.createObjectURL(svgBlob)
+
+  return new Promise((resolve, reject) => {
+    img.onload = () => {
+      ctx.drawImage(img, 15, 15) // Add padding offset
+
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Failed to create blob from canvas'))
+          return
+        }
+
+        const downloadUrl = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = downloadUrl
+        link.download = filename
+        link.click()
+        URL.revokeObjectURL(downloadUrl)
+        URL.revokeObjectURL(url)
+        resolve()
+      }, 'image/png')
+    }
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url)
+      reject(new Error('Failed to load SVG image'))
+    }
+
+    img.src = url
+  })
+}
+
+// Download fallback barcode (AZTEC, PDF417)
+async function downloadFallbackBarcode(filename) {
+  // Create a canvas with the barcode text
+  const canvas = document.createElement('canvas')
+  canvas.width = 600
+  canvas.height = 300
+  const ctx = canvas.getContext('2d')
+
+  // Set white background
+  ctx.fillStyle = 'white'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+  // Draw barcode type
+  ctx.fillStyle = '#7f8c8d'
+  ctx.font = '20px Arial'
+  ctx.textAlign = 'center'
+  ctx.fillText(`${card.value.barcodeType} - Preview not available`, canvas.width / 2, 100)
+
+  // Draw barcode data
+  ctx.fillStyle = '#333'
+  ctx.font = 'bold 36px monospace'
+  ctx.fillText(card.value.barcodeData, canvas.width / 2, 180)
+
+  // Convert to blob and download
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        reject(new Error('Failed to create blob from canvas'))
+        return
+      }
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      link.click()
+      URL.revokeObjectURL(url)
+      resolve()
+    }, 'image/png')
+  })
 }
 
 // Generate barcode for linear barcode types
@@ -419,6 +596,49 @@ onMounted(() => {
   padding-bottom: 10px;
 }
 
+.barcode-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.barcode-header h2 {
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+
+.download-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.download-button:hover {
+  background: #229954;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.download-button:active {
+  transform: translateY(0);
+}
+
+.download-button svg {
+  flex-shrink: 0;
+}
+
 .info-grid {
   display: grid;
   gap: 15px;
@@ -586,6 +806,17 @@ onMounted(() => {
 
   .fallback-text {
     font-size: 24px;
+  }
+
+  .barcode-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .download-button {
+    width: 100%;
+    justify-content: center;
   }
 }
 </style>

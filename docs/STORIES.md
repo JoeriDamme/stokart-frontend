@@ -423,10 +423,10 @@ GET /api/v1/cards/{id}
 **So that** I can save or print it for offline use
 
 **Acceptance Criteria:**
-- [ ] Download button is available on card detail page
-- [ ] Image downloads in high resolution (PNG or SVG)
-- [ ] Downloaded file has meaningful name (e.g., cardname-barcode.png)
-- [ ] Works on mobile and desktop browsers
+- [x] Download button is available on card detail page
+- [x] Image downloads in high resolution (PNG or SVG)
+- [x] Downloaded file has meaningful name (e.g., cardname-barcode.png)
+- [x] Works on mobile and desktop browsers
 
 ---
 

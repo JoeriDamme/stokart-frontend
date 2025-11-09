@@ -841,6 +841,421 @@ describe('CardDetailView', () => {
     })
   })
 
+  describe('Download Barcode Functionality', () => {
+    it('should display download button in barcode section', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'Test Card',
+        barcodeType: 'EAN13',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const downloadButton = wrapper.find('.download-button')
+      expect(downloadButton.exists()).toBe(true)
+      expect(downloadButton.text()).toContain('Download')
+    })
+  })
+
+  describe('Download Barcode Functionality - Integration', () => {
+    let mockLink
+    let mockCanvas
+    let createElementOriginal
+
+    beforeEach(() => {
+      // Save original createElement
+      createElementOriginal = document.createElement
+
+      // Mock document.createElement for 'a' link
+      mockLink = {
+        href: '',
+        download: '',
+        click: vi.fn(),
+        setAttribute: vi.fn(),
+        getAttribute: vi.fn(),
+        removeAttribute: vi.fn()
+      }
+
+      // Mock canvas and its context
+      const mockContext = {
+        fillStyle: '',
+        fillRect: vi.fn(),
+        drawImage: vi.fn(),
+        fillText: vi.fn(),
+        font: '',
+        textAlign: ''
+      }
+
+      mockCanvas = {
+        width: 0,
+        height: 0,
+        getContext: vi.fn().mockReturnValue(mockContext),
+        toBlob: vi.fn((callback) => {
+          const blob = new Blob(['mock-image-data'], { type: 'image/png' })
+          callback(blob)
+        })
+      }
+
+      // Mock createElement
+      document.createElement = vi.fn((tagName) => {
+        if (tagName === 'a') {
+          return mockLink
+        }
+        if (tagName === 'canvas') {
+          return mockCanvas
+        }
+        return createElementOriginal.call(document, tagName)
+      })
+
+      // Mock URL methods
+      global.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url')
+      global.URL.revokeObjectURL = vi.fn()
+    })
+
+    afterEach(() => {
+      // Restore original createElement
+      document.createElement = createElementOriginal
+    })
+
+    it('should generate meaningful filename from card name', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'My Store Card',
+        barcodeType: 'AZTEC',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const downloadButton = wrapper.find('.download-button')
+      await downloadButton.trigger('click')
+      await flushPromises()
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      expect(mockLink.download).toBe('my-store-card-barcode.png')
+      expect(mockLink.click).toHaveBeenCalled()
+    })
+
+    it('should use "unnamed-card" filename when cardName is null', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: null,
+        barcodeType: 'AZTEC',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const downloadButton = wrapper.find('.download-button')
+      await downloadButton.trigger('click')
+      await flushPromises()
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      expect(mockLink.download).toBe('unnamed-card-barcode.png')
+      expect(mockLink.click).toHaveBeenCalled()
+    })
+
+    it('should sanitize special characters in filename', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'My Store!@#$% Card & Co.',
+        barcodeType: 'AZTEC',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const downloadButton = wrapper.find('.download-button')
+      await downloadButton.trigger('click')
+      await flushPromises()
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      expect(mockLink.download).toBe('my-store-card-co-barcode.png')
+      expect(mockLink.click).toHaveBeenCalled()
+    })
+
+    it('should download QR code barcode when barcode type is QR', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'Test Card',
+        barcodeType: 'QR',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Mock QR code canvas
+      const mockQrCanvas = {
+        toBlob: vi.fn((callback) => {
+          const blob = new Blob(['qr-mock-data'], { type: 'image/png' })
+          callback(blob)
+        })
+      }
+
+      // Set up the QR code ref to have a canvas element
+      wrapper.vm.qrcodeRef = {
+        $el: {
+          querySelector: vi.fn(() => mockQrCanvas)
+        }
+      }
+
+      const downloadButton = wrapper.find('.download-button')
+      await downloadButton.trigger('click')
+      await flushPromises()
+
+      expect(mockQrCanvas.toBlob).toHaveBeenCalled()
+      expect(mockLink.click).toHaveBeenCalled()
+    })
+
+    it('should download linear barcode for EAN13 type', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'Test Card',
+        barcodeType: 'EAN13',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Mock SVG element for barcode
+      const mockSvgElement = {
+        getBBox: vi.fn().mockReturnValue({ width: 200, height: 100 })
+      }
+
+      wrapper.vm.barcodeCanvas = mockSvgElement
+
+      // Mock XMLSerializer
+      global.XMLSerializer = class {
+        serializeToString() {
+          return '<svg></svg>'
+        }
+      }
+
+      // Mock Image constructor
+      const mockImage = {
+        onload: null,
+        onerror: null,
+        src: ''
+      }
+
+      global.Image = class {
+        constructor() {
+          return mockImage
+        }
+      }
+
+      const downloadButton = wrapper.find('.download-button')
+      const clickPromise = downloadButton.trigger('click')
+
+      // Trigger image load after a tick
+      await flushPromises()
+      if (mockImage.onload) {
+        mockImage.onload()
+      }
+
+      await clickPromise
+      await flushPromises()
+      await new Promise(resolve => setTimeout(resolve, 50))
+
+      expect(mockLink.click).toHaveBeenCalled()
+      expect(mockLink.download).toBe('test-card-barcode.png')
+    })
+
+    it('should download fallback barcode for AZTEC type', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890',
+        cardName: 'Test Card',
+        barcodeType: 'AZTEC',
+        barcodeData: '1234567890',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const downloadButton = wrapper.find('.download-button')
+      await downloadButton.trigger('click')
+      await flushPromises()
+
+      expect(mockCanvas.toBlob).toHaveBeenCalled()
+      expect(mockLink.click).toHaveBeenCalled()
+      expect(mockLink.download).toBe('test-card-barcode.png')
+    })
+
+    it('should download fallback barcode for PDF417 type', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890',
+        cardName: 'Test Card',
+        barcodeType: 'PDF417',
+        barcodeData: '1234567890',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      const downloadButton = wrapper.find('.download-button')
+      await downloadButton.trigger('click')
+      await flushPromises()
+
+      expect(mockCanvas.toBlob).toHaveBeenCalled()
+      expect(mockLink.click).toHaveBeenCalled()
+    })
+
+    it('should not download when card is not available', async () => {
+      const mockCard = {
+        id: 'card-123',
+        cardNumber: '1234567890123',
+        cardName: 'Test Card',
+        barcodeType: 'EAN13',
+        barcodeData: '1234567890123',
+        storeId: null,
+        createdAt: 1735732800,
+        updatedAt: 1735732800
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Clear the card from the store
+      cardsStore.currentCard = null
+
+      const downloadButton = wrapper.find('.download-button')
+      await downloadButton.trigger('click')
+      await flushPromises()
+
+      // Click should not be called when card is null
+      expect(mockLink.click).not.toHaveBeenCalled()
+    })
+  })
+
   describe('API Integration', () => {
     it('should call cardsAPI.getCard with correct card ID', async () => {
       const mockCard = {
