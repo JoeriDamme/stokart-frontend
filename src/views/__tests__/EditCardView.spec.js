@@ -547,6 +547,61 @@ describe('EditCardView - US-5.1: Edit Existing Card', () => {
       expect(router.currentRoute.value.path).toBe('/cards/card-123')
     })
 
+    it('should not make API calls when cancel is clicked', async () => {
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123/edit')
+      const wrapper = mount(EditCardView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Make changes to the form
+      await wrapper.find('#cardName').setValue('Changed Name')
+      await wrapper.find('#cardNumber').setValue('9999999999999')
+
+      // Click cancel button
+      await wrapper.find('.cancel-button').trigger('click')
+      await flushPromises()
+
+      // Should NOT call updateCard API
+      expect(cardsAPI.updateCard).not.toHaveBeenCalled()
+    })
+
+    it('should discard all changes when cancel is clicked', async () => {
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123/edit')
+      const wrapper = mount(EditCardView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Original card data should be in store
+      expect(cardsStore.currentCard.cardName).toBe('My Store Card')
+
+      // Make changes to the form
+      await wrapper.find('#cardName').setValue('Changed Name')
+      await wrapper.find('#cardNumber').setValue('9999999999999')
+
+      // Click cancel button
+      await wrapper.find('.cancel-button').trigger('click')
+      await flushPromises()
+
+      // Store should still have original data (not changed)
+      expect(cardsStore.currentCard.cardName).toBe('My Store Card')
+    })
+
     it('should navigate to cards list from error state', async () => {
       const error404 = {
         response: {

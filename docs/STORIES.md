@@ -496,10 +496,10 @@ PUT /api/v1/cards/{id}
 **So that** I can discard modifications without saving
 
 **Acceptance Criteria:**
-- [ ] Cancel button is available on edit form
-- [ ] Clicking cancel discards all changes
-- [ ] User is returned to card detail view
-- [ ] No API call is made when canceling
+- [x] Cancel button is available on edit form
+- [x] Clicking cancel discards all changes
+- [x] User is returned to card detail view
+- [x] No API call is made when canceling
 
 ---
 
