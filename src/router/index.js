@@ -5,6 +5,7 @@ import LoginView from '@/views/LoginView.vue'
 import CardsView from '@/views/CardsView.vue'
 import CreateCardView from '@/views/CreateCardView.vue'
 import CardDetailView from '@/views/CardDetailView.vue'
+import EditCardView from '@/views/EditCardView.vue'
 
 const routes = [
   {
@@ -33,6 +34,12 @@ const routes = [
     path: '/cards/new',
     name: 'create-card',
     component: CreateCardView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/cards/:id/edit',
+    name: 'edit-card',
+    component: EditCardView,
     meta: { requiresAuth: true }
   },
   {

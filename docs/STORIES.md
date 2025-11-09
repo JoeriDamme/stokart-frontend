@@ -478,15 +478,15 @@ PUT /api/v1/cards/{id}
 - 409: Duplicate card (same cardNumber and storeId)
 
 **Acceptance Criteria:**
-- [ ] First fetch card details via GET /api/v1/cards/{id}
-- [ ] Edit form is pre-filled with existing card data
-- [ ] All fields can be modified except card ID
-- [ ] Form has same validation as create form
-- [ ] Barcode preview updates when card number or type changes
-- [ ] Success notification is shown after update
-- [ ] User is redirected to card detail view after update
-- [ ] API validation errors are displayed inline (422 errors)
-- [ ] Handle 404 errors (card not found)
+- [x] First fetch card details via GET /api/v1/cards/{id}
+- [x] Edit form is pre-filled with existing card data
+- [x] All fields can be modified except card ID
+- [x] Form has same validation as create form
+- [x] Barcode preview updates when card number or type changes
+- [x] Success notification is shown after update
+- [x] User is redirected to card detail view after update
+- [x] API validation errors are displayed inline (422 errors)
+- [x] Handle 404 errors (card not found)
 
 ---
 
