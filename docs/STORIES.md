@@ -529,14 +529,14 @@ DELETE /api/v1/cards/{id}
 - Cannot retrieve deleted cards via GET /api/v1/cards/{id}
 
 **Acceptance Criteria:**
-- [ ] Delete button is available on card detail and list views
-- [ ] Confirmation dialog appears before deletion
-- [ ] Dialog shows cardName (or "this card") and asks for confirmation
-- [ ] Card is removed from Pinia store and UI after successful deletion
-- [ ] Success notification is shown after deletion
-- [ ] User is redirected to cards list after deletion from detail view
-- [ ] Deletion can be canceled from confirmation dialog
-- [ ] Handle 404 errors gracefully
+- [x] Delete button is available on card detail and list views
+- [x] Confirmation dialog appears before deletion
+- [x] Dialog shows cardName (or "this card") and asks for confirmation
+- [x] Card is removed from Pinia store and UI after successful deletion
+- [x] Success notification is shown after deletion
+- [x] User is redirected to cards list after deletion from detail view
+- [x] Deletion can be canceled from confirmation dialog
+- [x] Handle 404 errors gracefully
 
 ---
 

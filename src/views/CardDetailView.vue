@@ -119,6 +119,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <ConfirmDialog
+      :is-open="showDeleteDialog"
+      :is-loading="isDeleting"
+      title="Delete Card"
+      :message="deleteDialogMessage"
+      confirm-text="Delete"
+      @confirm="handleConfirmDelete"
+      @cancel="handleCancelDelete"
+    />
   </div>
 </template>
 
@@ -129,6 +140,7 @@ import { useCardsStore } from '@/stores/cards'
 import { useNotification } from '@/composables/useNotification'
 import JsBarcode from 'jsbarcode'
 import QrcodeVue from 'qrcode.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -138,6 +150,8 @@ const { success, error: showError } = useNotification()
 const barcodeCanvas = ref(null)
 const qrcodeRef = ref(null)
 const barcodeError = ref('')
+const showDeleteDialog = ref(false)
+const isDeleting = ref(false)
 
 const isLoading = computed(() => cardsStore.isLoading)
 const card = computed(() => cardsStore.currentCard)
@@ -391,9 +405,46 @@ function handleEdit() {
 }
 
 function handleDelete() {
-  // Will be implemented in US-6.1
-  console.log('Delete functionality will be implemented in US-6.1')
+  showDeleteDialog.value = true
 }
+
+function handleCancelDelete() {
+  showDeleteDialog.value = false
+}
+
+async function handleConfirmDelete() {
+  if (!card.value) return
+
+  isDeleting.value = true
+
+  try {
+    await cardsStore.deleteCard(card.value.id)
+
+    success('Card deleted successfully!')
+
+    // Redirect to cards list
+    router.push('/cards')
+  } catch (error) {
+    console.error('Failed to delete card:', error)
+
+    if (error.response?.status === 404) {
+      showError('Card not found or already deleted')
+      // Still redirect to cards list since card doesn't exist
+      router.push('/cards')
+    } else {
+      showError('Failed to delete card. Please try again.')
+    }
+
+    showDeleteDialog.value = false
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+const deleteDialogMessage = computed(() => {
+  const cardName = card.value?.cardName || 'this card'
+  return `Are you sure you want to delete "${cardName}"? This action cannot be undone.`
+})
 
 // Fetch card on mount
 async function loadCard() {

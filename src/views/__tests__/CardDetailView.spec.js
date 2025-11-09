@@ -9,7 +9,8 @@ import { cardsAPI } from '@/api/cards'
 // Mock the API
 vi.mock('@/api/cards', () => ({
   cardsAPI: {
-    getCard: vi.fn()
+    getCard: vi.fn(),
+    deleteCard: vi.fn()
   }
 }))
 
@@ -1311,6 +1312,233 @@ describe('CardDetailView', () => {
       await flushPromises()
 
       expect(cardsStore.currentCard).toEqual(mockCard)
+    })
+  })
+
+  describe('Delete Card Functionality', () => {
+    const mockCard = {
+      id: 'card-123',
+      cardNumber: '1234567890123',
+      cardName: 'My Store Card',
+      barcodeType: 'EAN13',
+      barcodeData: '1234567890123',
+      storeId: null,
+      createdAt: 1735732800,
+      updatedAt: 1735732800
+    }
+
+    it('should show delete button on card detail page', async () => {
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      expect(wrapper.find('.delete-button').exists()).toBe(true)
+      expect(wrapper.find('.delete-button').text()).toBe('Delete')
+    })
+
+    it('should show confirmation dialog when delete button is clicked', async () => {
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Click delete button
+      await wrapper.find('.delete-button').trigger('click')
+      await flushPromises()
+
+      // Confirmation dialog should be visible
+      const dialog = wrapper.findComponent({ name: 'ConfirmDialog' })
+      expect(dialog.exists()).toBe(true)
+      expect(dialog.props('isOpen')).toBe(true)
+    })
+
+    it('should show card name in confirmation dialog message', async () => {
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Click delete button
+      await wrapper.find('.delete-button').trigger('click')
+      await flushPromises()
+
+      // Check dialog message contains card name
+      const dialog = wrapper.findComponent({ name: 'ConfirmDialog' })
+      expect(dialog.props('message')).toContain('My Store Card')
+    })
+
+    it('should show "this card" in dialog when cardName is null', async () => {
+      const cardWithoutName = { ...mockCard, cardName: null }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: cardWithoutName }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Click delete button
+      await wrapper.find('.delete-button').trigger('click')
+      await flushPromises()
+
+      // Check dialog message contains "this card"
+      const dialog = wrapper.findComponent({ name: 'ConfirmDialog' })
+      expect(dialog.props('message')).toContain('this card')
+    })
+
+    it('should close dialog when cancel is clicked', async () => {
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Open dialog
+      await wrapper.find('.delete-button').trigger('click')
+      await flushPromises()
+
+      // Cancel dialog
+      const dialog = wrapper.findComponent({ name: 'ConfirmDialog' })
+      dialog.vm.$emit('cancel')
+      await flushPromises()
+
+      // Dialog should be closed
+      expect(dialog.props('isOpen')).toBe(false)
+    })
+
+    it('should not make API call when cancel is clicked', async () => {
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Open dialog
+      await wrapper.find('.delete-button').trigger('click')
+      await flushPromises()
+
+      // Cancel dialog
+      const dialog = wrapper.findComponent({ name: 'ConfirmDialog' })
+      dialog.vm.$emit('cancel')
+      await flushPromises()
+
+      // Should NOT call deleteCard
+      expect(cardsAPI.deleteCard).not.toHaveBeenCalled()
+    })
+
+    it('should delete card and redirect to cards list on confirm', async () => {
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      cardsAPI.deleteCard.mockResolvedValue({})
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Open dialog
+      await wrapper.find('.delete-button').trigger('click')
+      await flushPromises()
+
+      // Confirm delete
+      const dialog = wrapper.findComponent({ name: 'ConfirmDialog' })
+      dialog.vm.$emit('confirm')
+      await flushPromises()
+
+      // Should call deleteCard API
+      expect(cardsAPI.deleteCard).toHaveBeenCalledWith('card-123')
+
+      // Should redirect to cards list
+      expect(router.currentRoute.value.path).toBe('/cards')
+    })
+
+    it('should handle 404 error gracefully and redirect', async () => {
+      const error404 = {
+        response: {
+          status: 404,
+          data: {
+            message: 'Card not found'
+          }
+        }
+      }
+
+      cardsAPI.getCard.mockResolvedValue({
+        data: { data: mockCard }
+      })
+
+      cardsAPI.deleteCard.mockRejectedValue(error404)
+
+      await router.push('/cards/card-123')
+      const wrapper = mount(CardDetailView, {
+        global: {
+          plugins: [pinia, router]
+        }
+      })
+
+      await flushPromises()
+
+      // Open dialog
+      await wrapper.find('.delete-button').trigger('click')
+      await flushPromises()
+
+      // Confirm delete
+      const dialog = wrapper.findComponent({ name: 'ConfirmDialog' })
+      dialog.vm.$emit('confirm')
+      await flushPromises()
+
+      // Should still redirect to cards list
+      expect(router.currentRoute.value.path).toBe('/cards')
     })
   })
 })

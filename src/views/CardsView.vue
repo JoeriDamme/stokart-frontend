@@ -131,6 +131,17 @@
         </div>
       </div>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <ConfirmDialog
+      :is-open="showDeleteDialog"
+      :is-loading="isDeleting"
+      title="Delete Card"
+      :message="deleteDialogMessage"
+      confirm-text="Delete"
+      @confirm="handleConfirmDelete"
+      @cancel="handleCancelDelete"
+    />
   </div>
 </template>
 
@@ -139,14 +150,22 @@ import { onMounted, ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useCardsStore } from '@/stores/cards'
+import { useNotification } from '@/composables/useNotification'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const cardsStore = useCardsStore()
+const { success, error: showError } = useNotification()
 
 // Pagination state
 const limit = ref(20)
+
+// Delete dialog state
+const showDeleteDialog = ref(false)
+const isDeleting = ref(false)
+const cardToDelete = ref(null)
 
 // Computed property for visible page numbers
 const visiblePages = computed(() => {
@@ -261,28 +280,58 @@ function handleViewCard(cardId) {
 }
 
 function handleEditCard(cardId) {
-  // TODO: Navigate to card edit page (US-5.1)
-  console.log('Edit card:', cardId)
+  router.push(`/cards/${cardId}/edit`)
 }
 
-async function handleDeleteCard(cardId, cardName) {
-  // TODO: Show confirmation dialog and delete card (US-6.1)
-  const confirmed = confirm(`Are you sure you want to delete ${cardName || 'this card'}?`)
+function handleDeleteCard(cardId, cardName) {
+  cardToDelete.value = { id: cardId, name: cardName }
+  showDeleteDialog.value = true
+}
 
-  if (confirmed) {
-    try {
-      await cardsStore.deleteCard(cardId)
-      console.log('Card deleted successfully')
+function handleCancelDelete() {
+  showDeleteDialog.value = false
+  cardToDelete.value = null
+}
 
-      // Refresh current page after deletion
-      const currentPage = cardsStore.pagination.currentPage
-      await cardsStore.fetchCards(currentPage, limit.value)
-    } catch (error) {
-      console.error('Failed to delete card:', error)
-      alert('Failed to delete card. Please try again.')
+async function handleConfirmDelete() {
+  if (!cardToDelete.value) return
+
+  isDeleting.value = true
+
+  try {
+    await cardsStore.deleteCard(cardToDelete.value.id)
+
+    success('Card deleted successfully!')
+
+    // Refresh current page after deletion
+    const currentPage = cardsStore.pagination.currentPage
+    await cardsStore.fetchCards(currentPage, limit.value)
+
+    showDeleteDialog.value = false
+    cardToDelete.value = null
+  } catch (error) {
+    console.error('Failed to delete card:', error)
+
+    if (error.response?.status === 404) {
+      showError('Card not found or already deleted')
+      // Refresh the list anyway
+      await cardsStore.fetchCards(cardsStore.pagination.currentPage, limit.value)
+      showDeleteDialog.value = false
+      cardToDelete.value = null
+    } else {
+      showError('Failed to delete card. Please try again.')
+      showDeleteDialog.value = false
+      cardToDelete.value = null
     }
+  } finally {
+    isDeleting.value = false
   }
 }
+
+const deleteDialogMessage = computed(() => {
+  const cardName = cardToDelete.value?.name || 'this card'
+  return `Are you sure you want to delete "${cardName}"? This action cannot be undone.`
+})
 </script>
 
 <style scoped>
