@@ -1,4 +1,4 @@
-# Stokard Clone - User Stories
+# Stokart Clone - User Stories
 
 ## API Endpoints Overview
 
@@ -727,7 +727,7 @@ The MVP is complete when all user stories in Epics 1-8 are done:
 
 ## API Verification Summary
 
-All user stories have been verified against the Stokard OpenAPI specification. Below is a summary of the verification:
+All user stories have been verified against the Stokart OpenAPI specification. Below is a summary of the verification:
 
 ### Authentication Stories (Epic 1) - ✅ Fully Supported
 - **US-1.1 (Registration)**: `POST /api/v1/auth/register` - Returns id, email, accessToken, refreshToken
@@ -787,4 +787,4 @@ All 27 MVP user stories can be fully implemented using the available API endpoin
 **Last Updated:** November 7, 2025
 **Total User Stories:** 27 (MVP) + 5 (Future)
 **Status:** Ready for Development
-**API Compatibility:** ✅ Verified against stokard-open-api.json
+**API Compatibility:** ✅ Verified against stokart-open-api.json

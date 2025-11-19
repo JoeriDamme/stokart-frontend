@@ -2,7 +2,7 @@
   <div class="register-container">
     <div class="register-card">
       <h1>Create Account</h1>
-      <p class="subtitle">Register for Stokard to manage your loyalty cards</p>
+      <p class="subtitle">Register for Stokart to manage your loyalty cards</p>
 
       <form @submit.prevent="handleSubmit" class="register-form">
         <!-- Name Field -->

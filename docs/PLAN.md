@@ -1,4 +1,4 @@
-# Stokard Clone Frontend - Vue 3 Implementation Plan
+# Stokart Clone Frontend - Vue 3 Implementation Plan
 
 ## 📦 Tech Stack
 
@@ -13,7 +13,7 @@
 
 ## 🎯 Project Goals
 
-Build a simple web application that consumes the stokard Clone API to:
+Build a simple web application that consumes the stokart Clone API to:
 - Authenticate users (login/register)
 - Display user's loyalty cards
 - Create/edit/delete cards
@@ -23,7 +23,7 @@ Build a simple web application that consumes the stokard Clone API to:
 ## 📁 Project Structure
 
 ```
-stokard-frontend/
+stokart-frontend/
 ├── public/                    # Static assets
 ├── src/
 │   ├── api/                   # API client & endpoints
@@ -91,10 +91,10 @@ stokard-frontend/
 cd /Users/joeridamme/Developer/personal/php
 
 # Create new Vue 3 project with Vite
-npm create vite@latest stokard-frontend -- --template vue
+npm create vite@latest stokart-frontend -- --template vue
 
 # Navigate into project
-cd stokard-frontend
+cd stokart-frontend
 ```
 
 ### 2. Install Dependencies
@@ -638,7 +638,7 @@ symfony server:start
 
 ### Terminal 2: Frontend (Vue)
 ```bash
-cd /Users/joeridamme/Developer/personal/php/stokard-frontend
+cd /Users/joeridamme/Developer/personal/php/stokart-frontend
 npm run dev
 
 # Frontend available at http://localhost:5173
