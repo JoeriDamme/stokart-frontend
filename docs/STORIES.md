@@ -764,7 +764,7 @@ All user stories have been verified against the Stokart OpenAPI specification. B
 
 3. **Card Fields**:
    - `cardName` and `storeId` are optional (can be null)
-   - `barcodeData` is automatically generated from `cardNumber` by the API
+   - The API no longer returns `barcodeData`; use `cardNumber` directly for barcode rendering
    - `createdAt` and `updatedAt` are Unix timestamps
 
 4. **Error Codes**:

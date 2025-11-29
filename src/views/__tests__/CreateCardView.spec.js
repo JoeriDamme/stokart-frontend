@@ -338,7 +338,6 @@ describe('CreateCardView - US-3.1: Create New Card', () => {
             cardNumber: '1234567890123',
             cardName: 'My Store Card',
             barcodeType: 'EAN13',
-            barcodeData: '1234567890123',
             storeId: null,
             createdAt: 1735732800,
             updatedAt: 1735732800
@@ -383,7 +382,6 @@ describe('CreateCardView - US-3.1: Create New Card', () => {
             cardNumber: '1234567',
             cardName: null,
             barcodeType: 'EAN8',
-            barcodeData: '1234567',
             storeId: null,
             createdAt: 1735732800,
             updatedAt: 1735732800
@@ -424,7 +422,6 @@ describe('CreateCardView - US-3.1: Create New Card', () => {
             cardNumber: '1234567890123',
             cardName: 'Store Card',
             barcodeType: 'EAN13',
-            barcodeData: '1234567890123',
             storeId: '550e8400-e29b-41d4-a716-446655440000',
             createdAt: 1735732800,
             updatedAt: 1735732800

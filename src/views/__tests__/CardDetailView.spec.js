@@ -110,7 +110,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'My Loyalty Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: '550e8400-e29b-41d4-a716-446655440000',
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -144,7 +143,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'My Loyalty Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -172,7 +170,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: null,
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -200,7 +197,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: '550e8400-e29b-41d4-a716-446655440000',
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -232,7 +228,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -261,7 +256,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800, // January 1, 2025, 12:00:00
         updatedAt: 1735819200 // January 2, 2025, 12:00:00
@@ -299,7 +293,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'QR',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -327,7 +320,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -356,7 +348,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567',
         cardName: 'Test Card',
         barcodeType: 'EAN8',
-        barcodeData: '1234567',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -384,7 +375,6 @@ describe('CardDetailView', () => {
         cardNumber: 'ABC123',
         cardName: 'Test Card',
         barcodeType: 'CODE128',
-        barcodeData: 'ABC123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -412,7 +402,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890',
         cardName: 'Test Card',
         barcodeType: 'AZTEC',
-        barcodeData: '1234567890',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -442,7 +431,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890',
         cardName: 'Test Card',
         barcodeType: 'PDF417',
-        barcodeData: '1234567890',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -474,7 +462,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -506,7 +493,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -538,7 +524,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -650,7 +635,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -702,7 +686,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -732,7 +715,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -780,7 +762,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -812,7 +793,6 @@ describe('CardDetailView', () => {
         cardNumber: null,
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: null,
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -849,7 +829,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -940,7 +919,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'My Store Card',
         barcodeType: 'AZTEC',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -974,7 +952,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: null,
         barcodeType: 'AZTEC',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1008,7 +985,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'My Store!@#$% Card & Co.',
         barcodeType: 'AZTEC',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1042,7 +1018,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'QR',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1090,7 +1065,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1159,7 +1133,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890',
         cardName: 'Test Card',
         barcodeType: 'AZTEC',
-        barcodeData: '1234567890',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1193,7 +1166,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890',
         cardName: 'Test Card',
         barcodeType: 'PDF417',
-        barcodeData: '1234567890',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1226,7 +1198,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1264,7 +1235,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1292,7 +1262,6 @@ describe('CardDetailView', () => {
         cardNumber: '1234567890123',
         cardName: 'Test Card',
         barcodeType: 'EAN13',
-        barcodeData: '1234567890123',
         storeId: null,
         createdAt: 1735732800,
         updatedAt: 1735732800
@@ -1321,7 +1290,6 @@ describe('CardDetailView', () => {
       cardNumber: '1234567890123',
       cardName: 'My Store Card',
       barcodeType: 'EAN13',
-      barcodeData: '1234567890123',
       storeId: null,
       createdAt: 1735732800,
       updatedAt: 1735732800

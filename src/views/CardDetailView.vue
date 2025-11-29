@@ -103,7 +103,7 @@
             <div v-else-if="card.barcodeType === 'QR'" class="qr-display">
               <qrcode-vue
                 ref="qrcodeRef"
-                :value="card.barcodeData"
+                :value="card.cardNumber"
                 :size="300"
                 level="M"
               />
@@ -112,7 +112,7 @@
               <svg ref="barcodeCanvas"></svg>
             </div>
             <div v-else class="fallback-display">
-              <p class="fallback-text">{{ card.barcodeData }}</p>
+              <p class="fallback-text">{{ card.cardNumber }}</p>
               <span class="fallback-info">{{ card.barcodeType }} - Preview not available</span>
             </div>
           </div>
@@ -346,7 +346,7 @@ async function downloadFallbackBarcode(filename) {
   // Draw barcode data
   ctx.fillStyle = '#333'
   ctx.font = 'bold 36px monospace'
-  ctx.fillText(card.value.barcodeData, canvas.width / 2, 180)
+  ctx.fillText(card.value.cardNumber, canvas.width / 2, 180)
 
   // Convert to blob and download
   return new Promise((resolve, reject) => {
@@ -386,7 +386,7 @@ function generateBarcode() {
             margin: 15
           }
 
-          JsBarcode(barcodeCanvas.value, card.value.barcodeData, options)
+          JsBarcode(barcodeCanvas.value, card.value.cardNumber, options)
         }
       } catch (err) {
         barcodeError.value = 'Failed to generate barcode'

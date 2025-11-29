@@ -2278,11 +2278,6 @@
                                 "type": "string",
                                 "example": "EAN13"
                               },
-                              "barcodeData": {
-                                "description": "Barcode data",
-                                "type": "string",
-                                "example": "1234567890123"
-                              },
                               "storeId": {
                                 "description": "Store UUID (null if not set)",
                                 "type": "string",
@@ -2348,7 +2343,6 @@
                             "cardNumber": "1234567890123",
                             "cardName": "Loyalty Card",
                             "barcodeType": "EAN13",
-                            "barcodeData": "1234567890123",
                             "storeId": "660e8400-e29b-41d4-a716-446655440000",
                             "createdAt": 1735732800,
                             "updatedAt": 1735732800
@@ -2358,7 +2352,6 @@
                             "cardNumber": "ABCD1234",
                             "cardName": null,
                             "barcodeType": "CODE128",
-                            "barcodeData": "ABCD1234",
                             "storeId": null,
                             "createdAt": 1735828200,
                             "updatedAt": 1735828200
@@ -2597,11 +2590,6 @@
                           "type": "string",
                           "example": "EAN13"
                         },
-                        "barcodeData": {
-                          "description": "Barcode data (same as card number)",
-                          "type": "string",
-                          "example": "1234567890123"
-                        },
                         "storeId": {
                           "description": "Store UUID (null if not provided)",
                           "type": "string",
@@ -2630,7 +2618,6 @@
                         "cardNumber": "1234567890123",
                         "cardName": "My Loyalty Card",
                         "barcodeType": "EAN13",
-                        "barcodeData": "1234567890123",
                         "storeId": "550e8400-e29b-41d4-a716-446655440000",
                         "createdAt": 1735732800
                       }
@@ -2938,11 +2925,6 @@
                           "type": "string",
                           "example": "EAN13"
                         },
-                        "barcodeData": {
-                          "description": "Barcode data",
-                          "type": "string",
-                          "example": "1234567890123"
-                        },
                         "storeId": {
                           "description": "Store UUID (null if not provided)",
                           "type": "string",
@@ -2977,7 +2959,6 @@
                         "cardNumber": "1234567890123",
                         "cardName": "My Loyalty Card",
                         "barcodeType": "EAN13",
-                        "barcodeData": "1234567890123",
                         "storeId": "550e8400-e29b-41d4-a716-446655440000",
                         "createdAt": 1735732800,
                         "updatedAt": 1735732800
@@ -2992,7 +2973,6 @@
                         "cardNumber": "9876543210",
                         "cardName": null,
                         "barcodeType": "CODE128",
-                        "barcodeData": "9876543210",
                         "storeId": null,
                         "createdAt": 1735732800,
                         "updatedAt": 1735732800
@@ -3318,11 +3298,6 @@
                           "type": "string",
                           "example": "CODE128"
                         },
-                        "barcodeData": {
-                          "description": "Updated barcode data (same as card number)",
-                          "type": "string",
-                          "example": "9876543210"
-                        },
                         "storeId": {
                           "description": "Updated store UUID (null if removed)",
                           "type": "string",
@@ -3357,7 +3332,6 @@
                         "cardNumber": "9876543210",
                         "cardName": "Updated Card Name",
                         "barcodeType": "CODE128",
-                        "barcodeData": "9876543210",
                         "storeId": "550e8400-e29b-41d4-a716-446655440000",
                         "createdAt": 1735732800,
                         "updatedAt": 1735828200

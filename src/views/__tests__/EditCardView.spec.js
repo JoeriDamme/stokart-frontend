@@ -37,7 +37,6 @@ describe('EditCardView - US-5.1: Edit Existing Card', () => {
     cardNumber: '1234567890123',
     cardName: 'My Store Card',
     barcodeType: 'EAN13',
-    barcodeData: '1234567890123',
     storeId: '550e8400-e29b-41d4-a716-446655440000',
     createdAt: 1735732800,
     updatedAt: 1735732800
