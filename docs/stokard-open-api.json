@@ -2285,6 +2285,46 @@
                                 "example": "550e8400-e29b-41d4-a716-446655440000",
                                 "nullable": true
                               },
+                              "store": {
+                                "description": "Full store details (null if storeId is null)",
+                                "properties": {
+                                  "id": {
+                                    "description": "Store UUID",
+                                    "type": "string",
+                                    "format": "uuid",
+                                    "example": "550e8400-e29b-41d4-a716-446655440000"
+                                  },
+                                  "name": {
+                                    "description": "Store name",
+                                    "type": "string",
+                                    "example": "Albert Heijn"
+                                  },
+                                  "logo": {
+                                    "description": "Store logo URL (null if not set)",
+                                    "type": "string",
+                                    "example": "https://example.com/logo.png",
+                                    "nullable": true
+                                  },
+                                  "country": {
+                                    "description": "Country code (NL, BE, DE, FR, UK, AT, LU, CH)",
+                                    "type": "string",
+                                    "example": "NL"
+                                  },
+                                  "website": {
+                                    "description": "Store website URL (null if not set)",
+                                    "type": "string",
+                                    "example": "https://ah.nl",
+                                    "nullable": true
+                                  },
+                                  "category": {
+                                    "description": "Store category (grocery, pharmacy, department_store, etc.)",
+                                    "type": "string",
+                                    "example": "grocery"
+                                  }
+                                },
+                                "type": "object",
+                                "nullable": true
+                              },
                               "createdAt": {
                                 "description": "Card creation timestamp (ISO 8601)",
                                 "type": "string",
@@ -2597,8 +2637,54 @@
                           "example": "550e8400-e29b-41d4-a716-446655440000",
                           "nullable": true
                         },
+                        "store": {
+                          "description": "Full store details (null if storeId is null)",
+                          "properties": {
+                            "id": {
+                              "description": "Store UUID",
+                              "type": "string",
+                              "format": "uuid",
+                              "example": "550e8400-e29b-41d4-a716-446655440000"
+                            },
+                            "name": {
+                              "description": "Store name",
+                              "type": "string",
+                              "example": "Albert Heijn"
+                            },
+                            "logo": {
+                              "description": "Store logo URL (null if not set)",
+                              "type": "string",
+                              "example": "https://example.com/logo.png",
+                              "nullable": true
+                            },
+                            "country": {
+                              "description": "Country code (NL, BE, DE, FR, UK, AT, LU, CH)",
+                              "type": "string",
+                              "example": "NL"
+                            },
+                            "website": {
+                              "description": "Store website URL (null if not set)",
+                              "type": "string",
+                              "example": "https://ah.nl",
+                              "nullable": true
+                            },
+                            "category": {
+                              "description": "Store category (grocery, pharmacy, department_store, etc.)",
+                              "type": "string",
+                              "example": "grocery"
+                            }
+                          },
+                          "type": "object",
+                          "nullable": true
+                        },
                         "createdAt": {
                           "description": "Card creation timestamp (ISO 8601)",
+                          "type": "string",
+                          "format": "date-time",
+                          "example": 1735732800
+                        },
+                        "updatedAt": {
+                          "description": "Card last update timestamp (ISO 8601)",
                           "type": "string",
                           "format": "date-time",
                           "example": 1735732800
@@ -2932,6 +3018,46 @@
                           "example": "550e8400-e29b-41d4-a716-446655440000",
                           "nullable": true
                         },
+                        "store": {
+                          "description": "Full store details (null if storeId is null)",
+                          "properties": {
+                            "id": {
+                              "description": "Store UUID",
+                              "type": "string",
+                              "format": "uuid",
+                              "example": "550e8400-e29b-41d4-a716-446655440000"
+                            },
+                            "name": {
+                              "description": "Store name",
+                              "type": "string",
+                              "example": "Albert Heijn"
+                            },
+                            "logo": {
+                              "description": "Store logo URL (null if not set)",
+                              "type": "string",
+                              "example": "https://example.com/logo.png",
+                              "nullable": true
+                            },
+                            "country": {
+                              "description": "Country code (NL, BE, DE, FR, UK, AT, LU, CH)",
+                              "type": "string",
+                              "example": "NL"
+                            },
+                            "website": {
+                              "description": "Store website URL (null if not set)",
+                              "type": "string",
+                              "example": "https://ah.nl",
+                              "nullable": true
+                            },
+                            "category": {
+                              "description": "Store category (grocery, pharmacy, department_store, etc.)",
+                              "type": "string",
+                              "example": "grocery"
+                            }
+                          },
+                          "type": "object",
+                          "nullable": true
+                        },
                         "createdAt": {
                           "description": "Card creation timestamp (ISO 8601)",
                           "type": "string",
@@ -2960,6 +3086,14 @@
                         "cardName": "My Loyalty Card",
                         "barcodeType": "EAN13",
                         "storeId": "550e8400-e29b-41d4-a716-446655440000",
+                        "store": {
+                          "id": "550e8400-e29b-41d4-a716-446655440000",
+                          "name": "Albert Heijn",
+                          "logo": "https://example.com/logo.png",
+                          "country": "NL",
+                          "website": "https://ah.nl",
+                          "category": "grocery"
+                        },
                         "createdAt": 1735732800,
                         "updatedAt": 1735732800
                       }
@@ -2974,6 +3108,7 @@
                         "cardName": null,
                         "barcodeType": "CODE128",
                         "storeId": null,
+                        "store": null,
                         "createdAt": 1735732800,
                         "updatedAt": 1735732800
                       }
@@ -3305,6 +3440,46 @@
                           "example": "550e8400-e29b-41d4-a716-446655440000",
                           "nullable": true
                         },
+                        "store": {
+                          "description": "Full store details (null if storeId is null)",
+                          "properties": {
+                            "id": {
+                              "description": "Store UUID",
+                              "type": "string",
+                              "format": "uuid",
+                              "example": "550e8400-e29b-41d4-a716-446655440000"
+                            },
+                            "name": {
+                              "description": "Store name",
+                              "type": "string",
+                              "example": "Albert Heijn"
+                            },
+                            "logo": {
+                              "description": "Store logo URL (null if not set)",
+                              "type": "string",
+                              "example": "https://example.com/logo.png",
+                              "nullable": true
+                            },
+                            "country": {
+                              "description": "Country code (NL, BE, DE, FR, UK, AT, LU, CH)",
+                              "type": "string",
+                              "example": "NL"
+                            },
+                            "website": {
+                              "description": "Store website URL (null if not set)",
+                              "type": "string",
+                              "example": "https://ah.nl",
+                              "nullable": true
+                            },
+                            "category": {
+                              "description": "Store category (grocery, pharmacy, department_store, etc.)",
+                              "type": "string",
+                              "example": "grocery"
+                            }
+                          },
+                          "type": "object",
+                          "nullable": true
+                        },
                         "createdAt": {
                           "description": "Card creation timestamp (unchanged)",
                           "type": "string",
@@ -3333,6 +3508,14 @@
                         "cardName": "Updated Card Name",
                         "barcodeType": "CODE128",
                         "storeId": "550e8400-e29b-41d4-a716-446655440000",
+                        "store": {
+                          "id": "550e8400-e29b-41d4-a716-446655440000",
+                          "name": "Albert Heijn",
+                          "logo": "https://example.com/logo.png",
+                          "country": "NL",
+                          "website": "https://ah.nl",
+                          "category": "grocery"
+                        },
                         "createdAt": 1735732800,
                         "updatedAt": 1735828200
                       }
@@ -3837,6 +4020,510 @@
           }
         ]
       }
+    },
+    "/stores": {
+      "get": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "List stores with optional filters",
+        "description": "Retrieve a list of retail stores from the catalog with optional filtering.\n\n**Public Endpoint:**\n- No authentication required\n- Stores are read-only reference data\n\n**Filtering:**\n- Search by store name (case-insensitive)\n- Filter by country (ISO 3166-1 alpha-2 code)\n- Filter by category\n- Multiple filters can be combined\n\n**Returns:**\n- Array of stores with full details\n- Store ID (UUID)\n- Store name\n- Logo URL (nullable)\n- Country code\n- Website URL (nullable)\n- Category\n\n**Pagination:**\n- Results are sorted by name (A-Z)\n- No pagination limits applied to store list (typically < 100 stores)\n\n**Empty State:**\n- Returns empty array when no stores match filters\n",
+        "operationId": "listStores",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Search for stores by name (case-insensitive, partial match)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "albert"
+            }
+          },
+          {
+            "name": "country",
+            "in": "query",
+            "description": "Filter by country (ISO 3166-1 alpha-2 code)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "NL",
+                "BE",
+                "DE",
+                "FR",
+                "UK",
+                "AT",
+                "LU",
+                "CH"
+              ],
+              "example": "NL"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter by store category",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "grocery",
+                "pharmacy",
+                "department_store",
+                "diy",
+                "electronics",
+                "fashion",
+                "sports",
+                "home",
+                "books",
+                "beauty"
+              ],
+              "example": "grocery"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of stores retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "properties": {
+                          "id": {
+                            "description": "Unique store identifier",
+                            "type": "string",
+                            "format": "uuid",
+                            "example": "550e8400-e29b-41d4-a716-446655440001"
+                          },
+                          "name": {
+                            "description": "Official store name",
+                            "type": "string",
+                            "example": "Albert Heijn"
+                          },
+                          "logo": {
+                            "description": "Store logo URL (null if not available)",
+                            "type": "string",
+                            "format": "uri",
+                            "example": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
+                            "nullable": true
+                          },
+                          "country": {
+                            "description": "Country code (ISO 3166-1 alpha-2)",
+                            "type": "string",
+                            "example": "NL"
+                          },
+                          "website": {
+                            "description": "Official website URL (null if not available)",
+                            "type": "string",
+                            "format": "uri",
+                            "example": "https://www.ah.nl",
+                            "nullable": true
+                          },
+                          "category": {
+                            "description": "Store category",
+                            "type": "string",
+                            "example": "grocery"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "storesList": {
+                    "summary": "List of stores",
+                    "value": {
+                      "data": [
+                        {
+                          "id": "550e8400-e29b-41d4-a716-446655440001",
+                          "name": "Albert Heijn",
+                          "logo": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
+                          "country": "NL",
+                          "website": "https://www.ah.nl",
+                          "category": "grocery"
+                        },
+                        {
+                          "id": "550e8400-e29b-41d4-a716-446655440002",
+                          "name": "Jumbo",
+                          "logo": "https://upload.wikimedia.org/wikipedia/commons/4/41/Jumbo_supermarkt_logo.svg",
+                          "country": "NL",
+                          "website": "https://www.jumbo.com",
+                          "category": "grocery"
+                        },
+                        {
+                          "id": "550e8400-e29b-41d4-a716-446655440003",
+                          "name": "HEMA",
+                          "logo": "https://upload.wikimedia.org/wikipedia/commons/1/1f/HEMA_logo.svg",
+                          "country": "NL",
+                          "website": "https://www.hema.nl",
+                          "category": "department_store"
+                        }
+                      ]
+                    }
+                  },
+                  "filteredByCategory": {
+                    "summary": "Stores filtered by category (pharmacy)",
+                    "value": {
+                      "data": [
+                        {
+                          "id": "550e8400-e29b-41d4-a716-446655440004",
+                          "name": "Etos",
+                          "logo": null,
+                          "country": "NL",
+                          "website": "https://www.etos.nl",
+                          "category": "pharmacy"
+                        },
+                        {
+                          "id": "550e8400-e29b-41d4-a716-446655440005",
+                          "name": "Kruidvat",
+                          "logo": null,
+                          "country": "NL",
+                          "website": "https://www.kruidvat.nl",
+                          "category": "pharmacy"
+                        }
+                      ]
+                    }
+                  },
+                  "searchResult": {
+                    "summary": "Search result for \"albert\"",
+                    "value": {
+                      "data": [
+                        {
+                          "id": "550e8400-e29b-41d4-a716-446655440001",
+                          "name": "Albert Heijn",
+                          "logo": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
+                          "country": "NL",
+                          "website": "https://www.ah.nl",
+                          "category": "grocery"
+                        }
+                      ]
+                    }
+                  },
+                  "emptyList": {
+                    "summary": "No stores match the filter criteria",
+                    "value": {
+                      "data": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid filter parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_FILTER"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid filter parameters"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidCountry": {
+                    "summary": "Invalid country code",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_FILTER",
+                        "message": "Invalid country code",
+                        "details": []
+                      }
+                    }
+                  },
+                  "invalidCategory": {
+                    "summary": "Invalid category value",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_FILTER",
+                        "message": "Invalid category value",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stores/{id}": {
+      "get": {
+        "tags": [
+          "Stores"
+        ],
+        "summary": "Get a specific store by ID",
+        "description": "Retrieve details of a specific retail store by its ID.\n\n**Public Endpoint:**\n- No authentication required\n- Stores are read-only reference data\n\n**Returns:**\n- Store ID (UUID)\n- Store name\n- Logo URL (nullable)\n- Country code\n- Website URL (nullable)\n- Category\n\n**Security:**\n- Returns 404 if store doesn't exist\n- No authorization checks (public data)\n",
+        "operationId": "getStore",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Store UUID",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "example": "550e8400-e29b-41d4-a716-446655440001"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Store retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "id": {
+                          "description": "Unique store identifier",
+                          "type": "string",
+                          "format": "uuid",
+                          "example": "550e8400-e29b-41d4-a716-446655440001"
+                        },
+                        "name": {
+                          "description": "Official store name",
+                          "type": "string",
+                          "example": "Albert Heijn"
+                        },
+                        "logo": {
+                          "description": "Store logo URL (null if not available)",
+                          "type": "string",
+                          "format": "uri",
+                          "example": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
+                          "nullable": true
+                        },
+                        "country": {
+                          "description": "Country code (ISO 3166-1 alpha-2)",
+                          "type": "string",
+                          "example": "NL"
+                        },
+                        "website": {
+                          "description": "Official website URL (null if not available)",
+                          "type": "string",
+                          "format": "uri",
+                          "example": "https://www.ah.nl",
+                          "nullable": true
+                        },
+                        "category": {
+                          "description": "Store category",
+                          "type": "string",
+                          "example": "grocery"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "successfulRetrieval": {
+                    "summary": "Store retrieved successfully",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440001",
+                        "name": "Albert Heijn",
+                        "logo": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
+                        "country": "NL",
+                        "website": "https://www.ah.nl",
+                        "category": "grocery"
+                      }
+                    }
+                  },
+                  "storeWithoutLogo": {
+                    "summary": "Store without logo or website",
+                    "value": {
+                      "data": {
+                        "id": "550e8400-e29b-41d4-a716-446655440004",
+                        "name": "Etos",
+                        "logo": null,
+                        "country": "NL",
+                        "website": null,
+                        "category": "pharmacy"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Store not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "STORE_NOT_FOUND"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Store with ID \"550e8400-e29b-41d4-a716-446655440000\" not found"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "storeNotFound": {
+                    "summary": "Store doesn't exist",
+                    "value": {
+                      "error": {
+                        "code": "STORE_NOT_FOUND",
+                        "message": "Store with ID \"550e8400-e29b-41d4-a716-446655440000\" not found",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid store ID format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INVALID_STORE_ID"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Invalid store ID format"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                },
+                "examples": {
+                  "invalidUuidFormat": {
+                    "summary": "Invalid UUID format",
+                    "value": {
+                      "error": {
+                        "code": "INVALID_STORE_ID",
+                        "message": "Invalid store ID format",
+                        "details": []
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "error": {
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "example": "INTERNAL_ERROR"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "An unexpected error occurred"
+                        },
+                        "details": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3861,6 +4548,10 @@
     {
       "name": "Cards",
       "description": "Cards"
+    },
+    {
+      "name": "Stores",
+      "description": "Stores"
     }
   ]
 }
