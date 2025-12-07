@@ -220,6 +220,9 @@ function clearSelection() {
 
 // Handle image load errors
 function handleImageError(event) {
+  const storeName = event.target.alt || 'Unknown store'
+  const logoUrl = event.target.src
+  console.warn('Failed to load store logo:', storeName, logoUrl)
   event.target.style.display = 'none'
 }
 

@@ -77,6 +77,7 @@ function formatCategory(category) {
 
 // Handle image load errors
 function handleImageError(event) {
+  console.warn('Failed to load store logo:', props.store.name, props.store.logo)
   event.target.style.display = 'none'
 }
 </script>
