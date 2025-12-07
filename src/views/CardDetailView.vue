@@ -64,10 +64,6 @@
               <span class="info-value">{{ card.barcodeType }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Store ID:</span>
-              <span class="info-value">{{ card.storeId || 'Not specified' }}</span>
-            </div>
-            <div class="info-item">
               <span class="info-label">Created:</span>
               <span class="info-value">{{ formatDate(card.createdAt) }}</span>
             </div>
@@ -76,6 +72,12 @@
               <span class="info-value">{{ formatDate(card.updatedAt) }}</span>
             </div>
           </div>
+        </div>
+
+        <!-- Store Information -->
+        <div v-if="card.store" class="store-info-section">
+          <h2>Store Information</h2>
+          <StoreDisplay :store="card.store" size="large" />
         </div>
 
         <!-- Barcode Display -->
@@ -137,6 +139,7 @@
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
+import StoreDisplay from '@/components/StoreDisplay.vue'
 import { useNotification } from '@/composables/useNotification'
 import JsBarcode from 'jsbarcode'
 import QrcodeVue from 'qrcode.vue'
@@ -631,6 +634,7 @@ onMounted(() => {
 }
 
 .card-info-section,
+.store-info-section,
 .barcode-section {
   background: white;
   padding: 30px;
@@ -639,6 +643,7 @@ onMounted(() => {
 }
 
 .card-info-section h2,
+.store-info-section h2,
 .barcode-section h2 {
   margin: 0 0 20px 0;
   color: #333;
