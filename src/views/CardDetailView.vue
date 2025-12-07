@@ -164,11 +164,14 @@ const displayCardName = computed(() => {
   return card.value?.cardName || 'Unnamed Card'
 })
 
-// Format Unix timestamp to readable date
+// Format timestamp to readable date (supports Unix timestamps and ISO 8601 strings)
 function formatDate(timestamp) {
   if (!timestamp) return 'N/A'
 
-  const date = new Date(timestamp * 1000)
+  // Support both Unix timestamps (numbers) and ISO 8601 strings
+  const date = typeof timestamp === 'number'
+    ? new Date(timestamp * 1000)  // Unix timestamp in seconds
+    : new Date(timestamp)          // ISO 8601 string
 
   const options = {
     year: 'numeric',
