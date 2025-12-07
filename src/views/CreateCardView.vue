@@ -58,20 +58,15 @@
           <span v-if="errors.barcodeType" class="error-message">{{ errors.barcodeType }}</span>
         </div>
 
-        <!-- Store ID Field -->
+        <!-- Store Selection Field -->
         <div class="form-group">
-          <label for="storeId">Store ID</label>
-          <input
-            id="storeId"
+          <label>Store</label>
+          <StorePicker
             v-model="formData.storeId"
-            type="text"
-            placeholder="Enter store ID (optional)"
-            :class="{ 'error': errors.storeId }"
-            @blur="validateStoreId"
-            @input="clearFieldError('storeId')"
+            placeholder="Select a store (optional)"
           />
           <span v-if="errors.storeId" class="error-message">{{ errors.storeId }}</span>
-          <span class="help-text">Optional - Must be a valid UUID v4</span>
+          <span class="help-text">Optional - Select a store for this card</span>
         </div>
 
         <!-- Barcode Preview -->
@@ -122,6 +117,7 @@ import { useRouter } from 'vue-router'
 import { useCardsStore } from '@/stores/cards'
 import JsBarcode from 'jsbarcode'
 import QrcodeVue from 'qrcode.vue'
+import StorePicker from '@/components/StorePicker.vue'
 
 const router = useRouter()
 const cardsStore = useCardsStore()
@@ -130,7 +126,7 @@ const formData = ref({
   cardNumber: '',
   cardName: '',
   barcodeType: '',
-  storeId: ''
+  storeId: null
 })
 
 const errors = ref({
@@ -202,30 +198,9 @@ function validateBarcodeType() {
   return true
 }
 
-function validateStoreId() {
-  const storeId = formData.value.storeId.trim()
-
-  // Optional field
-  if (!storeId) {
-    errors.value.storeId = ''
-    return true
-  }
-
-  // Validate UUID v4 format
-  const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-  if (!uuidV4Regex.test(storeId)) {
-    errors.value.storeId = 'Must be a valid UUID v4 format'
-    return false
-  }
-
-  errors.value.storeId = ''
-  return true
-}
-
 function validateForm() {
   const isCardNumberValid = validateCardNumber()
   const isBarcodeTypeValid = validateBarcodeType()
-  const isStoreIdValid = validateStoreId()
 
   // Card name validation (max 255 chars)
   if (formData.value.cardName && formData.value.cardName.length > 255) {
@@ -233,7 +208,7 @@ function validateForm() {
     return false
   }
 
-  return isCardNumberValid && isBarcodeTypeValid && isStoreIdValid
+  return isCardNumberValid && isBarcodeTypeValid
 }
 
 function clearFieldError(field) {
@@ -275,7 +250,7 @@ async function handleSubmit() {
       cardNumber: formData.value.cardNumber.trim(),
       cardName: formData.value.cardName.trim() || null,
       barcodeType: formData.value.barcodeType,
-      storeId: formData.value.storeId.trim() || null
+      storeId: formData.value.storeId || null
     }
 
     const response = await cardsStore.createCard(cardData)
