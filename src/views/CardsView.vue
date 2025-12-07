@@ -43,6 +43,11 @@
             :key="card.id"
             class="card-item"
           >
+            <!-- Store Display -->
+            <div v-if="card.store" class="card-store">
+              <StoreDisplay :store="card.store" size="small" />
+            </div>
+
             <div class="card-content">
               <h3 class="card-name">{{ card.cardName || 'Unnamed Card' }}</h3>
               <p class="card-number">{{ card.cardNumber }}</p>
@@ -152,6 +157,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useCardsStore } from '@/stores/cards'
 import { useNotification } from '@/composables/useNotification'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import StoreDisplay from '@/components/StoreDisplay.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -504,6 +510,12 @@ h1 {
 .card-item:hover {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
+}
+
+.card-store {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .card-content {
