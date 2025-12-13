@@ -27,7 +27,7 @@ export const useCardsStore = defineStore('cards', () => {
     try {
       const response = await cardsAPI.getCards({ page, limit })
 
-      cards.value = response.data.data.data
+      cards.value = response.data.data.cards
       pagination.value = response.data.data.pagination
 
       return response.data

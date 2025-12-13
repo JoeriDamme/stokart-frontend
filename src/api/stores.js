@@ -13,7 +13,7 @@ export const storesApi = {
     if (filters.category) params.append('category', filters.category)
 
     const response = await apiClient.get(`/api/v1/stores?${params}`)
-    return response.data.data.data // Returns array of stores (extra nesting level)
+    return response.data.data.stores
   },
 
   /**
@@ -23,6 +23,6 @@ export const storesApi = {
    */
   async getStoreById(id) {
     const response = await apiClient.get(`/api/v1/stores/${id}`)
-    return response.data.data.data // Returns store object (extra nesting level)
+    return response.data.data.store
   }
 }

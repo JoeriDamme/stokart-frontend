@@ -2252,7 +2252,7 @@
                   "properties": {
                     "data": {
                       "properties": {
-                        "data": {
+                        "cards": {
                           "type": "array",
                           "items": {
                             "properties": {
@@ -2377,7 +2377,7 @@
                     "summary": "List of cards with pagination",
                     "value": {
                       "data": {
-                        "data": [
+                        "cards": [
                           {
                             "id": "550e8400-e29b-41d4-a716-446655440000",
                             "cardNumber": "1234567890123",
@@ -2410,7 +2410,7 @@
                     "summary": "Empty list (no cards)",
                     "value": {
                       "data": {
-                        "data": [],
+                        "cards": [],
                         "pagination": {
                           "currentPage": 1,
                           "perPage": 20,
@@ -4081,6 +4081,31 @@
               ],
               "example": "grocery"
             }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (minimum 1, default 1)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1,
+              "example": 1
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Items per page (1-100, default 20)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "example": 20
+            }
           }
         ],
         "responses": {
@@ -4091,125 +4116,187 @@
                 "schema": {
                   "properties": {
                     "data": {
-                      "type": "array",
-                      "items": {
-                        "properties": {
-                          "id": {
-                            "description": "Unique store identifier",
-                            "type": "string",
-                            "format": "uuid",
-                            "example": "550e8400-e29b-41d4-a716-446655440001"
-                          },
-                          "name": {
-                            "description": "Official store name",
-                            "type": "string",
-                            "example": "Albert Heijn"
-                          },
-                          "logo": {
-                            "description": "Store logo URL (null if not available)",
-                            "type": "string",
-                            "format": "uri",
-                            "example": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
-                            "nullable": true
-                          },
-                          "country": {
-                            "description": "Country code (ISO 3166-1 alpha-2)",
-                            "type": "string",
-                            "example": "NL"
-                          },
-                          "website": {
-                            "description": "Official website URL (null if not available)",
-                            "type": "string",
-                            "format": "uri",
-                            "example": "https://www.ah.nl",
-                            "nullable": true
-                          },
-                          "category": {
-                            "description": "Store category",
-                            "type": "string",
-                            "example": "grocery"
+                      "properties": {
+                        "stores": {
+                          "type": "array",
+                          "items": {
+                            "properties": {
+                              "id": {
+                                "description": "Unique store identifier",
+                                "type": "string",
+                                "format": "uuid",
+                                "example": "550e8400-e29b-41d4-a716-446655440001"
+                              },
+                              "name": {
+                                "description": "Official store name",
+                                "type": "string",
+                                "example": "Albert Heijn"
+                              },
+                              "logo": {
+                                "description": "Store logo URL (null if not available)",
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
+                                "nullable": true
+                              },
+                              "country": {
+                                "description": "Country code (ISO 3166-1 alpha-2)",
+                                "type": "string",
+                                "example": "NL"
+                              },
+                              "website": {
+                                "description": "Official website URL (null if not available)",
+                                "type": "string",
+                                "format": "uri",
+                                "example": "https://www.ah.nl",
+                                "nullable": true
+                              },
+                              "category": {
+                                "description": "Store category",
+                                "type": "string",
+                                "example": "grocery"
+                              }
+                            },
+                            "type": "object"
                           }
                         },
-                        "type": "object"
-                      }
+                        "pagination": {
+                          "properties": {
+                            "currentPage": {
+                              "description": "Current page number",
+                              "type": "integer",
+                              "example": 1
+                            },
+                            "perPage": {
+                              "description": "Items per page",
+                              "type": "integer",
+                              "example": 20
+                            },
+                            "total": {
+                              "description": "Total number of stores",
+                              "type": "integer",
+                              "example": 45
+                            },
+                            "lastPage": {
+                              "description": "Last page number",
+                              "type": "integer",
+                              "example": 3
+                            }
+                          },
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
                     }
                   },
                   "type": "object"
                 },
                 "examples": {
                   "storesList": {
-                    "summary": "List of stores",
+                    "summary": "List of stores with pagination",
                     "value": {
-                      "data": [
-                        {
-                          "id": "550e8400-e29b-41d4-a716-446655440001",
-                          "name": "Albert Heijn",
-                          "logo": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
-                          "country": "NL",
-                          "website": "https://www.ah.nl",
-                          "category": "grocery"
-                        },
-                        {
-                          "id": "550e8400-e29b-41d4-a716-446655440002",
-                          "name": "Jumbo",
-                          "logo": "https://upload.wikimedia.org/wikipedia/commons/4/41/Jumbo_supermarkt_logo.svg",
-                          "country": "NL",
-                          "website": "https://www.jumbo.com",
-                          "category": "grocery"
-                        },
-                        {
-                          "id": "550e8400-e29b-41d4-a716-446655440003",
-                          "name": "HEMA",
-                          "logo": "https://upload.wikimedia.org/wikipedia/commons/1/1f/HEMA_logo.svg",
-                          "country": "NL",
-                          "website": "https://www.hema.nl",
-                          "category": "department_store"
+                      "data": {
+                        "stores": [
+                          {
+                            "id": "550e8400-e29b-41d4-a716-446655440001",
+                            "name": "Albert Heijn",
+                            "logo": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
+                            "country": "NL",
+                            "website": "https://www.ah.nl",
+                            "category": "grocery"
+                          },
+                          {
+                            "id": "550e8400-e29b-41d4-a716-446655440002",
+                            "name": "Jumbo",
+                            "logo": "https://upload.wikimedia.org/wikipedia/commons/4/41/Jumbo_supermarkt_logo.svg",
+                            "country": "NL",
+                            "website": "https://www.jumbo.com",
+                            "category": "grocery"
+                          },
+                          {
+                            "id": "550e8400-e29b-41d4-a716-446655440003",
+                            "name": "HEMA",
+                            "logo": "https://upload.wikimedia.org/wikipedia/commons/1/1f/HEMA_logo.svg",
+                            "country": "NL",
+                            "website": "https://www.hema.nl",
+                            "category": "department_store"
+                          }
+                        ],
+                        "pagination": {
+                          "currentPage": 1,
+                          "perPage": 20,
+                          "total": 3,
+                          "lastPage": 1
                         }
-                      ]
+                      }
                     }
                   },
                   "filteredByCategory": {
                     "summary": "Stores filtered by category (pharmacy)",
                     "value": {
-                      "data": [
-                        {
-                          "id": "550e8400-e29b-41d4-a716-446655440004",
-                          "name": "Etos",
-                          "logo": null,
-                          "country": "NL",
-                          "website": "https://www.etos.nl",
-                          "category": "pharmacy"
-                        },
-                        {
-                          "id": "550e8400-e29b-41d4-a716-446655440005",
-                          "name": "Kruidvat",
-                          "logo": null,
-                          "country": "NL",
-                          "website": "https://www.kruidvat.nl",
-                          "category": "pharmacy"
+                      "data": {
+                        "stores": [
+                          {
+                            "id": "550e8400-e29b-41d4-a716-446655440004",
+                            "name": "Etos",
+                            "logo": null,
+                            "country": "NL",
+                            "website": "https://www.etos.nl",
+                            "category": "pharmacy"
+                          },
+                          {
+                            "id": "550e8400-e29b-41d4-a716-446655440005",
+                            "name": "Kruidvat",
+                            "logo": null,
+                            "country": "NL",
+                            "website": "https://www.kruidvat.nl",
+                            "category": "pharmacy"
+                          }
+                        ],
+                        "pagination": {
+                          "currentPage": 1,
+                          "perPage": 20,
+                          "total": 2,
+                          "lastPage": 1
                         }
-                      ]
+                      }
                     }
                   },
                   "searchResult": {
                     "summary": "Search result for \"albert\"",
                     "value": {
-                      "data": [
-                        {
-                          "id": "550e8400-e29b-41d4-a716-446655440001",
-                          "name": "Albert Heijn",
-                          "logo": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
-                          "country": "NL",
-                          "website": "https://www.ah.nl",
-                          "category": "grocery"
+                      "data": {
+                        "stores": [
+                          {
+                            "id": "550e8400-e29b-41d4-a716-446655440001",
+                            "name": "Albert Heijn",
+                            "logo": "https://upload.wikimedia.org/wikipedia/commons/2/24/Albert_Heijn_Logo.svg",
+                            "country": "NL",
+                            "website": "https://www.ah.nl",
+                            "category": "grocery"
+                          }
+                        ],
+                        "pagination": {
+                          "currentPage": 1,
+                          "perPage": 20,
+                          "total": 1,
+                          "lastPage": 1
                         }
-                      ]
+                      }
                     }
                   },
                   "emptyList": {
                     "summary": "No stores match the filter criteria",
                     "value": {
-                      "data": []
+                      "data": {
+                        "stores": [],
+                        "pagination": {
+                          "currentPage": 1,
+                          "perPage": 20,
+                          "total": 0,
+                          "lastPage": 1
+                        }
+                      }
                     }
                   }
                 }
