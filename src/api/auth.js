@@ -31,5 +31,25 @@ export const authAPI = {
    */
   refresh(refreshToken) {
     return apiClient.post('/api/v1/auth/refresh', { refreshToken })
+  },
+
+  /**
+   * Request password reset
+   * @param {string} email - User's email address
+   * @returns {Promise} API response
+   */
+  requestPasswordReset(email) {
+    return apiClient.post('/api/v1/auth/password-reset/request', { email })
+  },
+
+  /**
+   * Confirm password reset with token
+   * @param {Object} data - Reset data
+   * @param {string} data.token - Reset token (UUID)
+   * @param {string} data.newPassword - New password
+   * @returns {Promise} API response
+   */
+  confirmPasswordReset(data) {
+    return apiClient.post('/api/v1/auth/password-reset/confirm', data)
   }
 }
